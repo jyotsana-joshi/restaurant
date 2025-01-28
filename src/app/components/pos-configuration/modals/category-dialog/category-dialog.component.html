@@ -1,0 +1,37 @@
+<form [formGroup]="addcategoryForm">
+  <div class="card">
+    <div class="card-body">
+      <h4 class="mb-32">Add Category</h4>
+
+      <!-- Row with two inputs and space between -->
+      <div class="main-form">
+        <mat-form-field class="flex-1 fs-16" appearance="outline">
+          <mat-label>Category Name</mat-label>
+          <input matInput type="text" formControlName="name" placeholder="Category Name" />
+        </mat-form-field>
+
+        <mat-form-field class="flex-1 fs-16" appearance="outline">
+          <mat-label>Select Branch</mat-label>
+          <mat-select formControlName="branchId">
+            <mat-option *ngFor="let branch of branchList" [value]="branch.id">{{ branch.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-slide-toggle formControlName="isActive">Active</mat-slide-toggle>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div mat-dialog-actions class="modal-btn">
+    <button mat-raised-button type="button" color="primary" (click)="onSave()" [disabled]="loading">
+      <ng-container *ngIf="!loading; else loadingSpinner">
+        {{buttonText}}
+      </ng-container>
+      <ng-template #loadingSpinner>
+        <mat-spinner diameter="20" [strokeWidth]="2" class="me-2"></mat-spinner>
+      </ng-template>
+    </button>
+    <a mat-raised-button mat-dialog-close color="warn">Close</a>
+  </div>
+</form>

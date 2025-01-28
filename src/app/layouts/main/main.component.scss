@@ -1,0 +1,26 @@
+.sidenav-container {
+  height: 100%;
+}
+
+.sidenav {
+  width: 200px;
+}
+
+.sidenav .mat-toolbar {
+  background: inherit;
+}
+.submenu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.submenu .sidebar-menu {
+  padding-left: 24px;
+  font-size: 0.9rem;
+}
+.list-group{
+  display: block;
+}
+
+

@@ -1,0 +1,78 @@
+<!-- Daily Activity -->
+<mat-card class="w-100">
+    <div class="add-btn">
+        <button mat-raised-button class="me-8 mb-8" color="primary" (click)="openAddUserPopup()">Add User</button>
+    </div>
+    <mat-card-content>
+      <div class="table-responsive">
+        <table mat-table [dataSource]="dataSource" class="text-nowrap w-100">
+  
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef> Id </th>
+            <td mat-cell class="fw-medium" *matCellDef="let element"> {{element.id}} </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef> Name </th>
+            <td mat-cell *matCellDef="let element">
+              <p class="mb-0 fw-medium op-5">{{element.name}}</p>
+            </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="outletName">
+            <th mat-header-cell *matHeaderCellDef> Outlet Name </th>
+            <td mat-cell *matCellDef="let element">
+              <span class="mb-0 fw-medium">{{element.outletName}}</span>
+            </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="mobile">
+            <th mat-header-cell *matHeaderCellDef> Mobile </th>
+            <td mat-cell *matCellDef="let element">
+              <p class="mb-0 fw-medium">{{element.mobile}}</p>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="userName">
+            <th mat-header-cell *matHeaderCellDef> User Name </th>
+            <td mat-cell *matCellDef="let element">
+              <p class="mb-0 fw-medium">{{element.userName}}</p>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="designation">
+            <th mat-header-cell *matHeaderCellDef> Designation </th>
+            <td mat-cell *matCellDef="let element">
+              <p class="mb-0 fw-medium">{{element.designation}}</p>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="userType">
+            <th mat-header-cell *matHeaderCellDef> User Type </th>
+            <td mat-cell *matCellDef="let element">
+              <p class="mb-0 fw-medium">{{element.userType}}</p>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="registeredAt">
+            <th mat-header-cell *matHeaderCellDef> Registered At </th>
+            <td mat-cell *matCellDef="let element">
+              <p class="mb-0 fw-medium">{{element.registeredAt}}</p>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="active">
+            <th mat-header-cell *matHeaderCellDef> Active </th>
+            <td mat-cell *matCellDef="let element">
+              <p class="badge badge-success rounded-pill">{{element.active}}</p>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef> Actions </th>
+            <td mat-cell *matCellDef="let element">
+              <i-feather name="edit" class="feather-base me-12"></i-feather>
+              <i-feather name="trash" class="feather-base me-12"></i-feather>
+            </td>
+          </ng-container>
+  
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>

@@ -1,0 +1,31 @@
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+  }
+
+  .card {
+    width: 600px; /* Set a fixed width for the card */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+    border-radius: 8px;
+    background-color: #fff;
+  }
+
+  .card-body {
+    text-align: center;
+  }
+
+  h4 {
+    font-size: 1.5rem;
+    color: #333;
+  }
+
+  mat-form-field {
+    margin-bottom: 16px;
+  }
+
+  button {
+    width: 100%; /* Make the button full width */
+  }

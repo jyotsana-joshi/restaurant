@@ -1,0 +1,28 @@
+<!-- Login -->
+ <div class="login-page">
+    <div class="card" *ngIf="!loading">
+        <div class="card-body">
+          <h4 class="mb-32">Restro Management Software</h4>
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <mat-form-field class="w-100 fs-16" appearance="outline">
+                <mat-label>User Name</mat-label>
+                <input matInput type="text"  formControlName="email" placeholder="Enter your User Name">
+                <mat-error *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+                    email is required
+                  </mat-error>
+              </mat-form-field>
+      
+            <mat-form-field class="w-100 fs-16" appearance="outline">
+              <mat-label>Password</mat-label>
+              <input matInput type="password" placeholder="Enter your password" formControlName="password">
+              <mat-error *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+                Password is required
+              </mat-error>
+            </mat-form-field>
+            <button mat-raised-button class="me-8 mb-8" color="primary"[disabled]="loginForm.invalid">Submit</button>
+          </form>
+        </div>
+      </div>
+      <mat-spinner *ngIf="loading"></mat-spinner>  
+ </div>
+

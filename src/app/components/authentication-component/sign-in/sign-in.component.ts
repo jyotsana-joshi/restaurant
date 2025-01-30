@@ -18,7 +18,7 @@ export class SignInComponent {
   loading = false;
   constructor(private fb: FormBuilder, private authService: AuthInterceptor, private router: Router,private toastrService:ToastrService) {
     this.loginForm = this.fb.group({
-      email: ['', Validators.required],
+      username: ['', Validators.required],
       password: ['', Validators.required]
     });
   }

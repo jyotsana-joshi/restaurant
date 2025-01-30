@@ -21,7 +21,7 @@ export class POSConfigurationService {
     return this.httpClient.put(`${this.ApiUrl}user/${userId}`, payload);
   }
   deleteUser(userIds: any) {
-    return this.httpClient.delete(`${this.ApiUrl}user`, userIds);
+    return this.httpClient.delete(`${this.ApiUrl}user`, { body: userIds });
   }
   getBranches() {
     return this.httpClient.get(`${this.ApiUrl}branches?offset=0&limit=10&orderDir=ASC&orderBy=id`);
@@ -34,7 +34,7 @@ export class POSConfigurationService {
 
   }
   deleteBranches(branchIds: any) {
-    return this.httpClient.delete(`${this.ApiUrl}branches`, {body:branchIds});
+    return this.httpClient.delete(`${this.ApiUrl}branches`, { body: branchIds });
   }
 
   getCategories() {
@@ -50,7 +50,7 @@ export class POSConfigurationService {
   }
   deleteCategories(categoryIds: any) {
     console.log('categoryIds: ', categoryIds);
-    return this.httpClient.delete(`${this.ApiUrl}outlet-menu`, {body:categoryIds});
+    return this.httpClient.delete(`${this.ApiUrl}outlet-menu`, { body: categoryIds });
 
   }
 
@@ -84,8 +84,11 @@ export class POSConfigurationService {
   }
 
   deleteTransactionType(transactionIds: any) {
-    return this.httpClient.delete(`${this.ApiUrl}tran-type`, {body :transactionIds});
+    return this.httpClient.delete(`${this.ApiUrl}tran-type`, { body: transactionIds });
 
   }
 
+  getDesignations() {
+    return this.httpClient.get(`${this.ApiUrl}list/designations`);
+  }
 }

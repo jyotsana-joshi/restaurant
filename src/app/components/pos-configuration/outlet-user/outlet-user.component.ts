@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { POSConfigurationService } from '../pos-configuration.service';
 import { AddUserDialogComponent } from '../modals/add-user-dialog/add-user-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface PeriodicElement {
   id: number;
@@ -13,70 +14,85 @@ export interface PeriodicElement {
   budget: string;
 }
 
-const ELEMENT_DATA = [
-  {id: 1, name: 'Deep Javiya', outletName: 'Bhavana Restuarant', mobile: '8954478415', userName: 'deep12', designation: 'Cashier', userType: 'Billing', registeredAt: '12/01/2025', active: 'Yes' },
- ];
+
 @Component({
   selector: 'app-outlet-user',
   templateUrl: './outlet-user.component.html',
   styleUrls: ['./outlet-user.component.scss']
 })
 export class OutletUserComponent {
-  displayedColumns: string[] = ['id', 'name', 'outletName', 'mobile', 'userName', 'designation', 'userType', 'registeredAt', 'active', 'actions'];
-  dataSource = ELEMENT_DATA;
-  // displayedColumns: string[] = ['id', 'assigned', 'name', 'priority', 'budget'];
+  displayedColumns: string[] = ['id', 'username', 'firstName', 'lastName', 'branch', 'designation', 'phone', 'active', 'actions'];
 
   loading = false;
-
-  constructor(private posConfiService: POSConfigurationService, private dialog: MatDialog) { }
+  dataSource : any= [];
+  constructor(private posConfiService: POSConfigurationService, private dialog: MatDialog, private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
     this.getUsers();
+    
   }
   getUsers() {
     this.loading = true;
     this.posConfiService.getUsers().subscribe(
       (response: any) => {
-        this.loading = false;
-        this.dataSource = response.users
-        console.log(response, "responseee");
+        console.log('response: ', response);
+        this.dataSource = response.data.users
         this.dataSource.map((el:any) =>{
           el.loading = false;
         });
+        this.loading = false;
+        console.log('this.dataSource: ', this.dataSource);
+
       },
       (error) => {
         this.loading = false;
-        console.log(error, "error")
       })
   }
+
   addUser() {
-    this.posConfiService.addUser({}).subscribe(
-      (response: any) => {
-        console.log(response, "response")
-      },
-      (error: any) => {
-        console.log(error, "error")
-      }
-    )
-  }
-  openAddUserPopup(){
     const dialogRef = this.dialog.open(AddUserDialogComponent, {
       width: '600px',
-      height:'auto'
+      height: 'auto',
+      data: { isEdit: false }
     });
 
-    dialogRef.afterClosed().subscribe((result:any) => {
-      if (result) {
-        console.log('User added:', result);
-        // Handle the result, e.g., send it to the server
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result.success) {
+        this.getUsers()
       }
     });
   }
-  edit(element: any): void {
+  editUser(element: any): void {
     console.log('Edit:', element);
-    // Implement your edit logic here
+    const dialogRef = this.dialog.open(AddUserDialogComponent, {
+      width: '600px',
+      height: 'auto',
+      data: { userDetails: element, isEdit: true }
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result.success) {
+        this.getUsers()
+      }
+    });
   }
-  deleteUser(){
-    
+  deleteUser(element:any){
+    element.loading = true;
+    this.posConfiService.deleteUser({ ids: [element.id] }).subscribe(
+      (response: any) => {
+        console.log(response)
+        element.loading = false;
+        this.snackBar.open('Branch deleted successfully', 'Close', {
+          duration: 2000,
+        });
+      }, (error) => {
+        console.log(error, "error");
+        element.loading = false;
+        this.snackBar.open('Failed to delete branch', 'Close', {
+          duration: 2000,
+        });
+
+      }
+    )
   }
 }

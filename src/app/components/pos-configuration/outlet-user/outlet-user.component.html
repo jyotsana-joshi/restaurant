@@ -1,78 +1,84 @@
 <!-- Daily Activity -->
 <mat-card class="w-100">
-    <div class="add-btn">
-        <button mat-raised-button class="me-8 mb-8" color="primary" (click)="openAddUserPopup()">Add User</button>
+  <div class="add-btn">
+    <button mat-raised-button class="me-8 mb-8" color="primary" (click)="addUser()">Add User</button>
+  </div>
+  <mat-card-content>
+    <!-- Loader -->
+    <div *ngIf="loading" class="table-loader">
+      <mat-spinner diameter="50" [strokeWidth]="4"></mat-spinner>
     </div>
-    <mat-card-content>
-      <div class="table-responsive">
-        <table mat-table [dataSource]="dataSource" class="text-nowrap w-100">
-  
-          <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef> Id </th>
-            <td mat-cell class="fw-medium" *matCellDef="let element"> {{element.id}} </td>
-          </ng-container>
-  
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef> Name </th>
-            <td mat-cell *matCellDef="let element">
-              <p class="mb-0 fw-medium op-5">{{element.name}}</p>
-            </td>
-          </ng-container>
-  
-          <ng-container matColumnDef="outletName">
-            <th mat-header-cell *matHeaderCellDef> Outlet Name </th>
-            <td mat-cell *matCellDef="let element">
-              <span class="mb-0 fw-medium">{{element.outletName}}</span>
-            </td>
-          </ng-container>
-  
-          <ng-container matColumnDef="mobile">
-            <th mat-header-cell *matHeaderCellDef> Mobile </th>
-            <td mat-cell *matCellDef="let element">
-              <p class="mb-0 fw-medium">{{element.mobile}}</p>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="userName">
-            <th mat-header-cell *matHeaderCellDef> User Name </th>
-            <td mat-cell *matCellDef="let element">
-              <p class="mb-0 fw-medium">{{element.userName}}</p>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="designation">
-            <th mat-header-cell *matHeaderCellDef> Designation </th>
-            <td mat-cell *matCellDef="let element">
-              <p class="mb-0 fw-medium">{{element.designation}}</p>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="userType">
-            <th mat-header-cell *matHeaderCellDef> User Type </th>
-            <td mat-cell *matCellDef="let element">
-              <p class="mb-0 fw-medium">{{element.userType}}</p>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="registeredAt">
-            <th mat-header-cell *matHeaderCellDef> Registered At </th>
-            <td mat-cell *matCellDef="let element">
-              <p class="mb-0 fw-medium">{{element.registeredAt}}</p>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="active">
-            <th mat-header-cell *matHeaderCellDef> Active </th>
-            <td mat-cell *matCellDef="let element">
-              <p class="badge badge-success rounded-pill">{{element.active}}</p>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef> Actions </th>
-            <td mat-cell *matCellDef="let element">
-              <i-feather name="edit" class="feather-base me-12"></i-feather>
-              <i-feather name="trash" class="feather-base me-12"></i-feather>
-            </td>
-          </ng-container>
-  
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
-      </div>
-    </mat-card-content>
-  </mat-card>
+
+    <!-- Table -->
+    <div class="table-responsive" [class.loading]="loading">
+      <table mat-table [dataSource]="dataSource" class="text-nowrap w-100">
+
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef> Id </th>
+          <td mat-cell class="fw-medium" *matCellDef="let element"> {{element.id}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="username">
+          <th mat-header-cell *matHeaderCellDef> User Name </th>
+          <td mat-cell *matCellDef="let element">
+            <p class="mb-0 fw-medium">{{element.username}}</p>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="firstName">
+          <th mat-header-cell *matHeaderCellDef> First Name </th>
+          <td mat-cell *matCellDef="let element">
+            <span class="mb-0 fw-medium">{{element.firstName}}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="lastName">
+          <th mat-header-cell *matHeaderCellDef> Last Name </th>
+          <td mat-cell *matCellDef="let element">
+            <p class="mb-0 fw-medium">{{element.lastName}}</p>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="branch">
+          <th mat-header-cell *matHeaderCellDef> Branch </th>
+          <td mat-cell *matCellDef="let element">
+            <p class="mb-0 fw-medium">{{element.branch?.name}}</p>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="designation">
+          <th mat-header-cell *matHeaderCellDef> Designation </th>
+          <td mat-cell *matCellDef="let element">
+            <p class="mb-0 fw-medium">{{element?.designation}}</p>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="phone">
+          <th mat-header-cell *matHeaderCellDef> Phone </th>
+          <td mat-cell *matCellDef="let element">
+            <p class="mb-0 fw-medium">{{element?.phone}}</p>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="active">
+          <th mat-header-cell *matHeaderCellDef> Active </th>
+          <td mat-cell *matCellDef="let element">
+            <p class="badge badge-success rounded-pill" *ngIf="element.isActive">Yes</p>
+            <p class="badge badge-danger rounded-pill" *ngIf="!element.isActive">No</p>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> Actions </th>
+          <td mat-cell *matCellDef="let element">
+            <i-feather name="edit" class="feather-base me-12" (click)="editUser(element)"></i-feather>
+            <span class="action-wrapper">
+              <i-feather *ngIf="!element.loading" name="trash" class="feather-base"
+                (click)="deleteUser(element)"></i-feather>
+              <mat-spinner *ngIf="element.loading" [diameter]="20" class="delete-spinner"></mat-spinner>
+            </span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+  </mat-card-content>
+</mat-card>

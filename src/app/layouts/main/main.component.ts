@@ -5,6 +5,7 @@ import { map, shareReplay } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSidenav } from '@angular/material/sidenav';
 import { AuthInterceptor } from 'src/app/utils/interceptors/auth.service';
+import { POSConfigurationService } from 'src/app/components/pos-configuration/pos-configuration.service';
 
 interface sidebarMenu {
   link: string;
@@ -57,15 +58,23 @@ export class MainComponent {
   routerActive: string = "activelink";
   showSubmenu: boolean = false;
   showSubSubMenu: boolean = false;
+  userDetails : any= []
   constructor(private breakpointObserver: BreakpointObserver, private authService: AuthInterceptor, private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute, private posConfiguration: POSConfigurationService
   ) {
-    this.route.params.subscribe(params => {
-      console.log('Route Parameters:', params);
-    });
+    this.getUser();
   }
   ngOnInit(): void {
     this.setOpenMenuBasedOnRoute();
+  }
+  getUser(){
+    const value = localStorage.getItem('userDetails');
+    this.posConfiguration.getUser(value).subscribe(
+      (response:any) =>{
+        console.log(response,"responsee");
+        this.userDetails = response.data.user
+      }
+    )
   }
   setOpenMenuBasedOnRoute(): void {
     const currentRoute = this.router.url;

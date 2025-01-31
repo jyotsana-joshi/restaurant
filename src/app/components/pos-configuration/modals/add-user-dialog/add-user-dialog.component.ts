@@ -28,7 +28,7 @@ export class AddUserDialogComponent {
     this.createForm();
     if (this.data.userDetails) {
       this.userDetails = this.data.userDetails;
-      console.log(this.userDetails, "branch details");
+      console.log(this.userDetails, "user details");
       this.setupForm()
     }
     this.isEdit = this.data.isEdit;
@@ -108,7 +108,7 @@ export class AddUserDialogComponent {
         }, (error: any) => {
           this.loading = false;
           console.log(error, "error")
-          this.toastrService.error('Error in editing branch', 'Branch');
+          this.toastrService.error('Error in editing user', 'User');
         })
     } else {
       if (this.addUserForm.valid) {
@@ -118,14 +118,14 @@ export class AddUserDialogComponent {
           (response: any) => {
             if (response.data) {
               this.loading = false;
-              this.toastrService.success(response.message, 'Branch');
+              this.toastrService.success(response.message, 'User');
               this.dialogRef.close({ success: true });
             }
           },
           (error: any) => {
             this.loading = false;
             console.log(error, "error")
-            this.toastrService.error('Error in adding branch', 'Branch');
+            this.toastrService.error('Error in adding User', 'User');
 
           }
         )

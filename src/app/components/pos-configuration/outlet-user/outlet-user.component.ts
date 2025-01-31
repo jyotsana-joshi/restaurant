@@ -81,14 +81,15 @@ export class OutletUserComponent {
     this.posConfiService.deleteUser({ ids: [element.id] }).subscribe(
       (response: any) => {
         console.log(response)
+        this.dataSource = this.dataSource.filter((user:any) => user.id !== element.id);
         element.loading = false;
-        this.snackBar.open('Branch deleted successfully', 'Close', {
+        this.snackBar.open('User deleted successfully', 'Close', {
           duration: 2000,
         });
       }, (error) => {
         console.log(error, "error");
         element.loading = false;
-        this.snackBar.open('Failed to delete branch', 'Close', {
+        this.snackBar.open('Failed to delete user', 'Close', {
           duration: 2000,
         });
 

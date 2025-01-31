@@ -76,6 +76,7 @@ export class ItemsComponent {
     this.posConfiService.deleteItem({ids: [element.id]}).subscribe(
       (response:any) =>{
         console.log(response);
+        this.dataSource = this.dataSource.filter((item:any) => item.id !== element.id);
         this.snackBar.open('Item deleted successfully', 'Close', {
           duration: 2000,
         });

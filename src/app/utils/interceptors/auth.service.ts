@@ -6,6 +6,7 @@ import { catchError, Observable, throwError } from 'rxjs';
 })
 export class AuthInterceptor implements HttpInterceptor {
   TOKEN_KEY = 'accessToken'
+  USER_KEY = 'userDetails'
   ApiUrl = 'https://restro-back-end-production.up.railway.app/v1/';
   constructor(private httpClient: HttpClient) { }
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -50,6 +51,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
   //for logout
   logout() {
-    return localStorage.removeItem(this.TOKEN_KEY);
+     localStorage.removeItem(this.TOKEN_KEY) 
+      localStorage.removeItem(this.USER_KEY);
   }
 }

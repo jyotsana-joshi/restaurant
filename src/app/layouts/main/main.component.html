@@ -5,11 +5,9 @@
     [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="(isHandset$ | async) === false">
 
     <div class="p-16">
-      <div class="mb-16">
-        <a href="javascript:void(0)" class="d-flex align-items-center">
-          <img src="assets/images/favicon.svg" alt="">
-        </a>
-
+      <div class="mb-16 p-4 d-flex align-items-center rounded shadow-sm" style="background: linear-gradient(135deg, #ff7e5f, #feb47b); color: white;">
+        <!-- <img src="assets/images/user2.webp" class="rounded-circle me-3 border border-light" alt="" width="40" height="40"> -->
+        <span class="fw-bold fs-5">Restro Management System</span>
       </div>
 
       <!-- <div class="pt-8">
@@ -88,9 +86,9 @@
       <div class="ms-auto">
         <button mat-button class="fs-16 pt-4 pb-4 ps-8 pe-8 text-light-muted d-flex align-items-center" [matMenuTriggerFor]="menu">
           <div class="d-flex align-items-center">
-            <img src="assets/images/user2.webp" class="rounded-circle" alt="">
+            <!-- <img src="assets/images/user2.webp" class="rounded-circle" alt=""> -->
             <span class="fw-light ms-8 text-secondary">Hi,</span>
-            <span class="fw-bold ms-8">Julia</span>
+            <span class="fw-bold ms-8">{{userDetails.username}}</span>
             <i-feather name="chevron-down" class="feather-base"></i-feather>
           </div>
         </button>
@@ -100,7 +98,7 @@
             <button mat-menu-item class="fs-16">Account</button>
             <button mat-menu-item class="fs-16">Change Password</button>
             <button mat-menu-item class="fs-16">My Settings</button>
-          </div>
+          </div> 
 
           <hr>
 

@@ -11,9 +11,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./items.component.scss']
 })
 export class ItemsComponent {
-  displayedColumns: string[] = ['id', 'name', 'category', 'active', 'actions'];
+  displayedColumns: string[] = ['id', 'name', 'category', 'printer','active', 'actions'];
   dataSource:any;
-
+  platforms: string[] = []; // Stores unique platform names
   loading = false;
 
   constructor(private posConfiService: POSConfigurationService, private dialog: MatDialog, private snackBar: MatSnackBar) { }
@@ -27,11 +27,9 @@ export class ItemsComponent {
       (response: any) => {
         console.log('response: ', response);
         if(response.data.sub_items.length > 0){
+          this.formatTableData(response.data.sub_items);
           this.loading = false;
-          this.dataSource = response.data.sub_items;
-          this.dataSource.map((el:any) =>{
-            el.loading = false;
-          });
+          console.log(this.loading,"loading")
         }
       },
       (error) => {
@@ -40,6 +38,48 @@ export class ItemsComponent {
       })
   }
 
+  formatTableData(data: any[]) {
+    console.log('data: ', data);
+      let platformsSet = new Set<string>();
+  
+      // Extract unique platform names
+      data.forEach(item => {
+        console.log('item: ', item);
+        item?.price?.forEach((priceObj:any) => {
+          platformsSet.add(priceObj.platForm);
+        });
+      });
+  
+      this.platforms = Array.from(platformsSet); // Store unique platforms
+  
+      // Update displayedColumns dynamically
+      this.displayedColumns = ['id', 'name', ...this.platforms, 'category', 'printer','active', 'actions'];
+  
+      // Transform data for table display
+      this.dataSource = data.map(item => {
+        console.log('item: ', item);
+        let row: any = {
+          id: item.id,
+          name: item.name,
+          category: item.outletMenu?.name || '',
+          printer: item.printer,
+          active: item.isActive ? 'Yes' : 'No',
+          outletMenu: item.outletMenu,
+          price: item.price
+        };
+  
+        // Add platform prices to respective columns
+        console.log('item.price: ', item.price);
+        item?.price?.forEach((priceObj:any) => {
+          row[priceObj.platForm] = priceObj.price; // Example: row['Zomato'] = "23.00"
+        });
+  
+        return row;
+      });
+      console. log('Updated Columns:', this.displayedColumns);
+      console.log('Updated DataSource:', this.dataSource,this.platforms);
+    
+  }
   addItem(){
     const dialogRef = this.dialog.open(ItemDialogComponent, {
       width: '600px',

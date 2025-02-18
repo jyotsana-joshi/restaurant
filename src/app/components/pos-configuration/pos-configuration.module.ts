@@ -22,7 +22,7 @@ import { ItemDialogComponent } from './modals/item-dialog/item-dialog.component'
     CategoriesComponent,
     CategoryDialogComponent,
     ItemsComponent,
-    ItemDialogComponent
+    ItemDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -39,7 +39,7 @@ import { ItemDialogComponent } from './modals/item-dialog/item-dialog.component'
     CategoriesComponent,
     CategoryDialogComponent,
     ItemsComponent,
-    ItemDialogComponent
+    ItemDialogComponent,
   ]
 })
 export class POSConfigurationModule { }

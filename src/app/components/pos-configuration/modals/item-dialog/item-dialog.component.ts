@@ -1,5 +1,5 @@
 import { Component, Inject, InjectionToken, Input } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, FormArray, ValidatorFn, AbstractControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { POSConfigurationService } from '../../pos-configuration.service';
 import { ToastrService } from 'ngx-toastr';
@@ -16,6 +16,8 @@ export class ItemDialogComponent {
   isEdit: boolean = false;
   buttonText = 'Add';
   categoryList: any = []
+  transactionTypes:any;
+  transactionTypeErrors: boolean[] = [];
   constructor(private fb: FormBuilder,
     private dialogRef: MatDialogRef<ItemDialogComponent>,
     private posConfiService: POSConfigurationService,
@@ -34,24 +36,56 @@ export class ItemDialogComponent {
   }
   ngOnInit(): void {
     this.getAllCategories();
+    this.getTransactionType();
   }
 
   createForm() {
     this.addItemForm = this.fb.group({
       name: [''],
-      price: [],
       offer: [],
       categoryId: [],
       isActive: [false],
+      printer:[],
+      price: this.fb.array([], this.duplicateTransactionValidator())
     });
+    this.addTransactionRow();
   }
+
+  get price(): FormArray {
+    return this.addItemForm.get('price') as FormArray;
+  }
+  addTransactionRow() {
+    const transactionGroup = this.fb.group({
+      platForm: [null, Validators.required],
+      price: [null, [Validators.required, Validators.min(0)]]
+    });
+
+    this.price.push(transactionGroup);
+  }
+
+  removeTransactionRow(index: number) {
+    this.price.removeAt(index);
+    this.addItemForm.get('price')?.updateValueAndValidity(); // Trigger validation update
+  }
+
+  // Custom Validator to Check Duplicate Transaction Types
+  duplicateTransactionValidator(): ValidatorFn {
+    return (formArray: AbstractControl) => {
+      const transactionTypes = (formArray as FormArray).controls.map(control => control.get('transactionType')?.value);
+      const duplicates = transactionTypes.filter((type, index, self) => type && self.indexOf(type) !== index);
+      
+      return duplicates.length > 0 ? { duplicateTransaction: true } : null;
+    };
+  }
+
   setupForm() {
+    console.log('this.itemDetails: ', this.itemDetails);
     this.addItemForm.patchValue({
-      name: this.itemDetails.name || '', 
-      price: this.itemDetails.price || '', 
-      offer: this.itemDetails.offer || '', 
-      categoryId: this.itemDetails.outletMenu.id || '', 
-      isActive: this.itemDetails.isActive || false, 
+      name: this.itemDetails?.name || '', 
+      price: this.itemDetails?.price || '', 
+      offer: this.itemDetails?.offer || '', 
+      categoryId: this.itemDetails?.outletMenu?.id || '', 
+      isActive: this.itemDetails?.isActive || false, 
     });
   }
   // Handle form submission
@@ -80,6 +114,7 @@ export class ItemDialogComponent {
       if (this.addItemForm.valid) {
         // Get form values
         this.loading = true;
+        console.log('this.addItemForm.value: ', this.addItemForm.value);
         this.posConfiService.addItem(this.addItemForm.value).subscribe(
           (response: any) => {
             if (response.data) {
@@ -122,6 +157,17 @@ export class ItemDialogComponent {
         }
 
       })
+  }
+
+  getTransactionType(){
+    this.posConfiService.getTransctionType().subscribe(
+      (response:any) =>{
+        if(response?.data?.tidTypes?.length){
+          console.log('response: ', response);
+          this.transactionTypes = response.data.tidTypes
+        }
+      }
+    )
   }
 }
 

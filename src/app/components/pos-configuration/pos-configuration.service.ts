@@ -96,4 +96,8 @@ export class POSConfigurationService {
   getDesignations() {
     return this.httpClient.get(`${this.ApiUrl}list/designations`);
   }
+
+  getTransctionType(){
+    return this.httpClient.get(`${this.ApiUrl}tran-type?offset=0&limit=10&orderDir=DESC&orderBy=id`);
+  }
 }

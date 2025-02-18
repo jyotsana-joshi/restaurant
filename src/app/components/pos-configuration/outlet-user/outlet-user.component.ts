@@ -21,7 +21,7 @@ export interface PeriodicElement {
   styleUrls: ['./outlet-user.component.scss']
 })
 export class OutletUserComponent {
-  displayedColumns: string[] = ['id', 'username', 'firstName', 'lastName', 'branch', 'designation', 'phone', 'active', 'actions'];
+  displayedColumns: string[] = ['id', 'username', 'firstName', 'lastName', 'branch', 'designation', 'active', 'actions'];
 
   loading = false;
   dataSource : any= [];

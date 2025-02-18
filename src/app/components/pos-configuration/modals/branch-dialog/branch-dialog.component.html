@@ -14,6 +14,14 @@
           <mat-label>Short Name</mat-label>
           <input matInput type="text" formControlName="code" placeholder="Short Name" />
         </mat-form-field>
+        <mat-form-field class="flex-1 fs-16" appearance="outline">
+          <mat-label>Address</mat-label>
+          <textarea matInput type="text" formControlName="address" placeholder="Address" ></textarea>
+        </mat-form-field>
+        <mat-form-field class="flex-1 fs-16" appearance="outline">
+          <mat-label>TRN Number</mat-label>
+          <input matInput type="number" formControlName="pnrNum" placeholder="PNR Numbers" />
+        </mat-form-field>
         <div>
           <mat-slide-toggle formControlName="isActive">Active</mat-slide-toggle>
         </div>

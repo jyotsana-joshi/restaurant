@@ -1,7 +1,7 @@
 <form [formGroup]="addcategoryForm">
   <div class="card">
     <div class="card-body">
-      <h4 class="mb-32">Add Category</h4>
+      <h4 class="mb-32">{{buttonText}} Category</h4>
 
       <!-- Row with two inputs and space between -->
       <div class="main-form">
@@ -11,10 +11,8 @@
         </mat-form-field>
 
         <mat-form-field class="flex-1 fs-16" appearance="outline">
-          <mat-label>Select Branch</mat-label>
-          <mat-select formControlName="branchId">
-            <mat-option *ngFor="let branch of branchList" [value]="branch.id">{{ branch.name }}</mat-option>
-          </mat-select>
+          <mat-label>Printer</mat-label>
+            <input matInput type="text" formControlName="printer" placeholder="Printer Name" />
         </mat-form-field>
 
         <mat-slide-toggle formControlName="isActive">Active</mat-slide-toggle>

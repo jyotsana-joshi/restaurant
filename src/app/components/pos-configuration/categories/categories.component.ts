@@ -12,7 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./categories.component.scss']
 })
 export class CategoriesComponent {
-  displayedColumns: string[] = ['id', 'name', 'branchName', 'active', 'actions'];
+  displayedColumns: string[] = ['id', 'name','printer', 'active', 'actions'];
   dataSource: any;
 
   loading = false;

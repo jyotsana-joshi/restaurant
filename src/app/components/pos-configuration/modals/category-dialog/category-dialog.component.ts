@@ -33,30 +33,27 @@ export class CategoryDialogComponent {
       this.buttonText = 'Edit'
   }
   ngOnInit(): void {
-    this.getAllBranches();
   }
 
   createForm() {
     this.addcategoryForm = this.fb.group({
       name: [''],
-      branchId: [],
+      printer: [],
       isActive: [false],
     });
   }
   setupForm() {
     this.addcategoryForm.patchValue({
-      name: this.categoryDetails.name || '', // Fallback to empty string if value is undefined
-      branchId: this.categoryDetails?.branch?.id || '', // Fallback to empty string if value is undefined
-      isActive: this.categoryDetails.isActive || false, // Fallback to false if value is undefined
+      name: this.categoryDetails.name || '', 
+      printer: this.categoryDetails?.printer,
+      isActive: this.categoryDetails.isActive || false, 
     });
   }
   // Handle form submission
   onSave() {
-    console.log('this.isEdit: ', this.isEdit);
     if (this.isEdit) {
       this.loading = true;
       const updatedData = this.getUpdatedData()
-      console.log('updatedData: ', updatedData);
       this.posConfiService.editCategories(updatedData, this.categoryDetails.id).subscribe(
         (response: any) => {
           this.loading = false;
@@ -64,8 +61,6 @@ export class CategoryDialogComponent {
             this.toastrService.success(response.message);
             this.dialogRef.close({ success: true })
           }
-
-          console.log('response: ', response);
 
         }, (error: any) => {
           this.loading = false;
@@ -107,17 +102,6 @@ export class CategoryDialogComponent {
     });
 
     return updatedData;
-  }
-
-  getAllBranches() {
-    this.posConfiService.getBranches().subscribe(
-      (response: any) => {
-        console.log('response: ', response);
-        if (response.data.branches.length > 0) {
-          this.branchList = response.data.branches;
-        }
-
-      })
   }
 }
 

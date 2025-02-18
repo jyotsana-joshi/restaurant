@@ -30,3 +30,15 @@
     pointer-events: none;
     opacity: 0.5;
   }
+
+  .action-wrapper {
+    position: relative;
+    display: inline-block; /* Ensures the spinner and icon share the same space */
+    width: 24px; /* Adjust based on your icon size */
+    height: 24px;
+    text-align: center;
+  }
+  
+  .delete-spinner {
+    margin: 0 auto; /* Center the spinner within the wrapper */
+  }

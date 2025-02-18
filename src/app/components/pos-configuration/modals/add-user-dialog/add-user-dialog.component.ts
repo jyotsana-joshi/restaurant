@@ -1,5 +1,5 @@
 import { Component, Inject, InjectionToken } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, UntypedFormControl, FormControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { POSConfigurationService } from '../../pos-configuration.service';
 import { ToastrService } from 'ngx-toastr';
@@ -19,6 +19,8 @@ export class AddUserDialogComponent {
   designation: any = [];
   loading = false;
   addUserForm: FormGroup = new FormGroup({});
+  designationControl:any = new UntypedFormControl()
+  branchControl:any = new UntypedFormControl()
   constructor(private fb: FormBuilder,
     private posConfiService: POSConfigurationService,
     private dialogRef: MatDialogRef<AddUserDialogComponent>,
@@ -28,7 +30,7 @@ export class AddUserDialogComponent {
     this.createForm();
     if (this.data.userDetails) {
       this.userDetails = this.data.userDetails;
-      console.log(this.userDetails, "branch details");
+      console.log(this.userDetails, "user details");
       this.setupForm()
     }
     this.isEdit = this.data.isEdit;
@@ -38,6 +40,22 @@ export class AddUserDialogComponent {
   ngOnInit(): void {
     this.getDesignations();
     this.getBranches();
+    this.designationControl.valueChanges.subscribe((val:any) =>{
+      console.log('val: ', val);
+      if(val == 1 || val == 2){
+        this.addUserForm.controls['branchId'].disable();
+        this.addUserForm.controls['password'].enable();
+      }else if(val === 3){
+        this.addUserForm.controls['password'].disable();
+      }
+    });
+    this.branchControl.valueChanges.subscribe((val:any) =>{
+      if(val){
+        this.addUserForm.controls['designationId'].disable();
+      }else{
+        this.addUserForm.controls['designationId'].enable();
+      }
+    });
   }
 
   getDesignations() {
@@ -67,25 +85,23 @@ export class AddUserDialogComponent {
       username: [''],
       firstName: [''],
       lastName: [''],
-      email: [''],
-      password: [''],
-      confirmPassword: [''],
+      password: [{value:'', disable:false}],
       designationId: [''],
       branchId: [''],
-      phone: ['']
     });
+
+    this.designationControl = this.addUserForm.controls['designationId'];
+    this.branchControl = this.addUserForm.controls['branchId'];
+
   }
   setupForm() {
     this.addUserForm.patchValue({
       name: this.userDetails.username , // Fallback to empty string if value is undefined
       firstName: this.userDetails.firstName,
       lastName: this.userDetails.lastName,
-      email: this.userDetails.email,
       password: null,
-      confirmPassword: null,
       designationId: this.userDetails?.designation?.id,
       branchId: this.userDetails?.branch?.id,
-      phone: this.userDetails.phone
     });
   }
   // Handle form submission
@@ -108,7 +124,7 @@ export class AddUserDialogComponent {
         }, (error: any) => {
           this.loading = false;
           console.log(error, "error")
-          this.toastrService.error('Error in editing branch', 'Branch');
+          this.toastrService.error('Error in editing user', 'User');
         })
     } else {
       if (this.addUserForm.valid) {
@@ -116,16 +132,16 @@ export class AddUserDialogComponent {
         this.loading = true;
         this.posConfiService.addUser(this.addUserForm.value).subscribe(
           (response: any) => {
-            if (response.data) {
+            if (response) {
               this.loading = false;
-              this.toastrService.success(response.message, 'Branch');
+              this.toastrService.success(response.message, 'User');
               this.dialogRef.close({ success: true });
             }
           },
           (error: any) => {
             this.loading = false;
             console.log(error, "error")
-            this.toastrService.error('Error in adding branch', 'Branch');
+            this.toastrService.error('Error in adding User', 'User');
 
           }
         )
@@ -145,6 +161,13 @@ export class AddUserDialogComponent {
     });
 
     return updatedData;
+  }
+
+  clearSelection(formControl:any){
+    this.addUserForm.controls[formControl].setValue(null)
+    this.addUserForm.controls['designationId'].enable();
+    this.addUserForm.controls['branchId'].enable();
+    this.addUserForm.controls['password'].enable();
   }
 }
 

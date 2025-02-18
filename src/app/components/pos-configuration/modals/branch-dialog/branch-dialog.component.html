@@ -1,7 +1,7 @@
 <form [formGroup]="addBranchForm">
   <div class="card">
     <div class="card-body">
-      <h4 class="mb-32">Add Branch</h4>
+      <h4 class="mb-32">{{buttonText}} Branch</h4>
 
       <!-- Row with two inputs and space between -->
       <div class="main-form">
@@ -13,6 +13,14 @@
         <mat-form-field class="flex-1 fs-16" appearance="outline">
           <mat-label>Short Name</mat-label>
           <input matInput type="text" formControlName="code" placeholder="Short Name" />
+        </mat-form-field>
+        <mat-form-field class="flex-1 fs-16" appearance="outline">
+          <mat-label>Address</mat-label>
+          <textarea matInput type="text" formControlName="address" placeholder="Address" ></textarea>
+        </mat-form-field>
+        <mat-form-field class="flex-1 fs-16" appearance="outline">
+          <mat-label>TRN Number</mat-label>
+          <input matInput type="number" formControlName="pnrNum" placeholder="PNR Numbers" />
         </mat-form-field>
         <div>
           <mat-slide-toggle formControlName="isActive">Active</mat-slide-toggle>

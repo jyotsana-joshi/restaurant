@@ -38,6 +38,8 @@ export class BranchDialogComponent {
     this.addBranchForm = this.fb.group({
       name: [''],
       code: [''],
+      address:[''],
+      pnrNum:[''],
       isActive: [],
     });
   }
@@ -47,6 +49,11 @@ export class BranchDialogComponent {
       code: this.branchDetails.code || '', // Fallback to empty string if value is undefined
       isActive: this.branchDetails.isActive || false, // Fallback to false if value is undefined
     });
+  }
+  getInitials(name: string): string {
+    if (!name) return '';
+    const words = name.trim().split(' ');
+    return words.map(word => word.charAt(0)).join('').toUpperCase();
   }
   // Handle form submission
   onSave() {

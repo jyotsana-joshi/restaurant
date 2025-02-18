@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -7,9 +8,13 @@ import { Injectable } from '@angular/core';
 export class POSConfigurationService {
 
   ApiUrl = 'https://restro-back-end-production.up.railway.app/v1/';
-
+  userDetails$: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   constructor(private httpClient: HttpClient) { }
 
+  getUser(userId:any) {
+    return this.httpClient.get(`${this.ApiUrl}user/${userId}`);
+  }
+  
   getUsers() {
     return this.httpClient.get(`${this.ApiUrl}user?offset=0&limit=10&orderDir=ASC&orderBy=id`);
   }
@@ -90,5 +95,9 @@ export class POSConfigurationService {
 
   getDesignations() {
     return this.httpClient.get(`${this.ApiUrl}list/designations`);
+  }
+
+  getTransctionType(){
+    return this.httpClient.get(`${this.ApiUrl}tran-type?offset=0&limit=10&orderDir=DESC&orderBy=id`);
   }
 }

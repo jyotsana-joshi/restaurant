@@ -1,7 +1,7 @@
 <mat-card class="w-100">
   <div class="add-btn">
     <button mat-raised-button class="me-8 mb-8" color="primary" (click)="addItem()">Add Item</button>
-  </div>
+  </div> 
   <mat-card-content>
     <div class="table-container position-relative">
       <!-- Loader -->
@@ -10,39 +10,56 @@
       </div>
 
       <!-- Table -->
-      <div class="table-responsive" [class.loading]="loading">
+      <div class="table-responsive">
         <table mat-table [dataSource]="dataSource" class="text-nowrap w-100">
           <!-- Id Column -->
           <ng-container matColumnDef="id">
             <th mat-header-cell *matHeaderCellDef> Id </th>
-            <td mat-cell class="fw-medium" *matCellDef="let element"> {{element.id}} </td>
+            <td mat-cell class="fw-medium" *matCellDef="let element"> {{ element.id }} </td>
           </ng-container>
-  
+
           <!-- Name Column -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef> Name </th>
             <td mat-cell *matCellDef="let element">
-              <span class="mb-0 fw-medium">{{element.name}}</span>
+              <span class="mb-0 fw-medium">{{ element.name }}</span>
             </td>
           </ng-container>
-  
-          <!-- Branch Column -->
+
+          <!-- Dynamic Platform Columns -->
+          <!-- Dynamic Platform Columns -->
+          <ng-container *ngFor="let platform of platforms">
+            <ng-container [matColumnDef]="platform">
+              <th mat-header-cell *matHeaderCellDef> {{ platform }} </th>
+              <td mat-cell *matCellDef="let element"> {{ element[platform] ||  0}} AED </td>
+            </ng-container>
+          </ng-container>
+
+
+          <!-- Category Column -->
           <ng-container matColumnDef="category">
             <th mat-header-cell *matHeaderCellDef> Category </th>
             <td mat-cell *matCellDef="let element">
-              <span class="mb-0 fw-medium">{{element.outletMenu.name}}</span>
+              <span class="mb-0 fw-medium">{{ element.category }}</span>
             </td>
           </ng-container>
-  
+
+          <ng-container matColumnDef="printer">
+            <th mat-header-cell *matHeaderCellDef> Printer </th>
+            <td mat-cell *matCellDef="let element">
+              <span class="mb-0 fw-medium">{{ element.printer }}</span>
+            </td>
+          </ng-container>
+
           <!-- Active Column -->
           <ng-container matColumnDef="active">
             <th mat-header-cell *matHeaderCellDef> Active </th>
             <td mat-cell *matCellDef="let element">
-              <p class="badge badge-success rounded-pill" *ngIf="element.isActive">Yes</p>
-              <p class="badge badge-danger rounded-pill" *ngIf="!element.isActive">No</p>
+              <p class="badge badge-success rounded-pill" *ngIf="element.active === 'Yes'">Yes</p>
+              <p class="badge badge-danger rounded-pill" *ngIf="element.active === 'No'">No</p>
             </td>
           </ng-container>
-  
+
           <!-- Actions Column -->
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef> Actions </th>

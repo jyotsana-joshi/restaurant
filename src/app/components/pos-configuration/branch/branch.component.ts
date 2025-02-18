@@ -22,7 +22,7 @@ export interface PeriodicElement {
   styleUrls: ['./branch.component.scss']
 })
 export class BranchComponent {
-  displayedColumns: string[] = ['id', 'name', 'code', 'active', 'actions'];
+  displayedColumns: string[] = ['id', 'name', 'code', 'address','pnrNum','active', 'actions'];
   dataSource: any;
 
   loading = false;
@@ -86,6 +86,7 @@ export class BranchComponent {
     this.posConfiService.deleteBranches({ ids: [element.id] }).subscribe(
       (response: any) => {
         console.log(response)
+        this.dataSource = this.dataSource.filter((branch:any) => branch.id !== element.id);
         element.loading = false;
         this.snackBar.open('Branch deleted successfully', 'Close', {
           duration: 2000,

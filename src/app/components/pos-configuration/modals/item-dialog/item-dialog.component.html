@@ -29,7 +29,7 @@
         <div *ngFor="let trans of price.controls; let i = index" [formGroupName]="i" class="transaction-row">
           <mat-form-field appearance="outline" class="transaction-select">
             <mat-label>Transaction Type</mat-label>
-            <mat-select formControlName="platForm" (selectionChange)="addItemForm.get('price')?.updateValueAndValidity()">
+            <mat-select formControlName="platFormId" (selectionChange)="addItemForm.get('price')?.updateValueAndValidity()"  (selectionChange)="onTransactionTypeSelect(i, $event.value)">
               <mat-option *ngFor="let type of transactionTypes" [value]="type.id">{{ type.name }}</mat-option>
             </mat-select>
           </mat-form-field>
@@ -46,7 +46,7 @@
       </div>
 
       <!-- Duplicate Transaction Error Message -->
-      <mat-error *ngIf="addItemForm.hasError('duplicateTransaction', 'transactionPrices')">
+      <mat-error *ngIf="addItemForm.get('price')?.hasError('duplicateTransaction')">
         A transaction type has been selected multiple times. Please remove duplicates.
       </mat-error>
 

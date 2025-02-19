@@ -16,7 +16,7 @@ export class ItemDialogComponent {
   isEdit: boolean = false;
   buttonText = 'Add';
   categoryList: any = []
-  transactionTypes:any;
+  transactionTypes: any;
   transactionTypeErrors: boolean[] = [];
   constructor(private fb: FormBuilder,
     private dialogRef: MatDialogRef<ItemDialogComponent>,
@@ -45,7 +45,7 @@ export class ItemDialogComponent {
       offer: [],
       categoryId: [],
       isActive: [false],
-      printer:[],
+      printer: [],
       price: this.fb.array([], this.duplicateTransactionValidator())
     });
     this.addTransactionRow();
@@ -56,7 +56,8 @@ export class ItemDialogComponent {
   }
   addTransactionRow() {
     const transactionGroup = this.fb.group({
-      platForm: [null, Validators.required],
+      platFormId: [null, Validators.required],
+      platForm: [null],
       price: [null, [Validators.required, Validators.min(0)]]
     });
 
@@ -65,32 +66,63 @@ export class ItemDialogComponent {
 
   removeTransactionRow(index: number) {
     this.price.removeAt(index);
-    this.addItemForm.get('price')?.updateValueAndValidity(); // Trigger validation update
+    this.addItemForm.get('price')?.updateValueAndValidity();
   }
 
   // Custom Validator to Check Duplicate Transaction Types
   duplicateTransactionValidator(): ValidatorFn {
     return (formArray: AbstractControl) => {
-      const transactionTypes = (formArray as FormArray).controls.map(control => control.get('transactionType')?.value);
+      const transactionTypes = (formArray as FormArray).controls.map(control => control.get('platFormId')?.value);
       const duplicates = transactionTypes.filter((type, index, self) => type && self.indexOf(type) !== index);
-      
+      console.log('duplicates: ', duplicates);
       return duplicates.length > 0 ? { duplicateTransaction: true } : null;
     };
   }
+  onTransactionTypeSelect(index: number, selectedTransactionId: number) {
+    // Find the full transaction object based on the selected ID
+    console.log('this.transactionTypes: ', this.transactionTypes);
+    const selectedTransaction = this.transactionTypes.find((type: any) => type.id === selectedTransactionId);
+    console.log('selectedTransaction: ', selectedTransaction);
+
+    if (selectedTransaction) {
+      const transactionControl = this.price.at(index);
+      console.log('transactionControl: ', transactionControl);
+
+      transactionControl.patchValue({
+        platFormId: selectedTransaction.id,
+        platForm: selectedTransaction.name,
+        price: selectedTransaction.price  // Automatically populate the price
+      });
+    }
+  }
 
   setupForm() {
-    console.log('this.itemDetails: ', this.itemDetails);
     this.addItemForm.patchValue({
-      name: this.itemDetails?.name || '', 
-      price: this.itemDetails?.price || '', 
-      offer: this.itemDetails?.offer || '', 
-      categoryId: this.itemDetails?.outletMenu?.id || '', 
-      isActive: this.itemDetails?.isActive || false, 
+      name: this.itemDetails?.name || '',
+      price: this.itemDetails?.price || '',
+      offer: this.itemDetails?.offer || '',
+      printer: this.itemDetails?.printer || '',
+      categoryId: this.itemDetails?.outletMenu?.id || '',
+      isActive: this.itemDetails?.isActive || false,
     });
+    // Clear existing price controls before adding new ones
+    this.price.clear();
+
+    // Patch price FormArray if itemDetails has price data
+    if (this.itemDetails?.price?.length) {
+      this.itemDetails.price.forEach((priceItem: any) => {
+        const transactionGroup = this.fb.group({
+          platFormId: [priceItem.platFormId, Validators.required],
+          platForm: [priceItem.platForm],
+          price: [priceItem.price, [Validators.required, Validators.min(0)]]
+        });
+
+        this.price.push(transactionGroup);
+      });
+    }
   }
   // Handle form submission
   onSave() {
-    console.log('this.isEdit: ', this.isEdit);
     if (this.isEdit) {
       this.loading = true;
       const updatedData = this.getUpdatedData()
@@ -102,9 +134,6 @@ export class ItemDialogComponent {
             this.toastrService.success(response.message);
             this.dialogRef.close({ success: true })
           }
-
-          console.log('response: ', response);
-
         }, (error: any) => {
           this.loading = false;
           console.log(error, "error")
@@ -112,9 +141,8 @@ export class ItemDialogComponent {
         })
     } else {
       if (this.addItemForm.valid) {
-        // Get form values
-        this.loading = true;
         console.log('this.addItemForm.value: ', this.addItemForm.value);
+        this.loading = true;
         this.posConfiService.addItem(this.addItemForm.value).subscribe(
           (response: any) => {
             if (response.data) {
@@ -159,10 +187,10 @@ export class ItemDialogComponent {
       })
   }
 
-  getTransactionType(){
+  getTransactionType() {
     this.posConfiService.getTransctionType().subscribe(
-      (response:any) =>{
-        if(response?.data?.tidTypes?.length){
+      (response: any) => {
+        if (response?.data?.tidTypes?.length) {
           console.log('response: ', response);
           this.transactionTypes = response.data.tidTypes
         }

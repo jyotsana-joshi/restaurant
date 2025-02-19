@@ -7,7 +7,7 @@ import { catchError, Observable, throwError } from 'rxjs';
 export class AuthInterceptor implements HttpInterceptor {
   TOKEN_KEY = 'accessToken'
   USER_KEY = 'userDetails'
-  ApiUrl = 'https://restro-back-end-production.up.railway.app/v1/';
+  ApiUrl = 'https://restro-back-end-production-8537.up.railway.app/v1/';
   constructor(private httpClient: HttpClient) { }
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // Get the access token (e.g., from localStorage or a service)

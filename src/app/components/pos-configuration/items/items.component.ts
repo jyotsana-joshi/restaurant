@@ -25,11 +25,11 @@ export class ItemsComponent {
     this.loading = true;
     this.posConfiService.getItems().subscribe(
       (response: any) => {
-        console.log('response: ', response);
         if(response.data.sub_items.length > 0){
           this.formatTableData(response.data.sub_items);
           this.loading = false;
-          console.log(this.loading,"loading")
+        }else{
+          this.loading = false;
         }
       },
       (error) => {

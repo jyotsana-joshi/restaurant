@@ -7,7 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class POSConfigurationService {
 
-  ApiUrl = 'https://restro-back-end-production.up.railway.app/v1/';
+  ApiUrl = 'https://restro-back-end-production-8537.up.railway.app/v1/';
   userDetails$: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   constructor(private httpClient: HttpClient) { }
 

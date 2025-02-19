@@ -33,6 +33,8 @@ export class CategoriesComponent {
             el.loading = false;
           })
           console.log('this.dataSource: ', this.dataSource);
+        }else{
+          this.loading = false;
         }
       },
       (error) => {

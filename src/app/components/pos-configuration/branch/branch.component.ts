@@ -22,7 +22,7 @@ export interface PeriodicElement {
   styleUrls: ['./branch.component.scss']
 })
 export class BranchComponent {
-  displayedColumns: string[] = ['id', 'name', 'code', 'address','pnrNum','active', 'actions'];
+  displayedColumns: string[] = ['id', 'name', 'code', 'address','prnNum','active', 'actions'];
   dataSource: any;
 
   loading = false;

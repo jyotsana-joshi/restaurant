@@ -58,7 +58,7 @@ export class CategoryDialogComponent {
         (response: any) => {
           this.loading = false;
           if (response.message) {
-            this.toastrService.success(response.message);
+            this.toastrService.success("Category Added successfully", 'Category');
             this.dialogRef.close({ success: true })
           }
 
@@ -75,7 +75,7 @@ export class CategoryDialogComponent {
           (response: any) => {
             if (response.data) {
               this.loading = false;
-              this.toastrService.success(response.message, 'Category');
+              this.toastrService.success('Category Added successfully', 'Category');
               this.dialogRef.close({ success: true });
             }
           },

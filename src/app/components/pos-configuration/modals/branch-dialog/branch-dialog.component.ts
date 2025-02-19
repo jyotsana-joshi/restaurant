@@ -39,15 +39,17 @@ export class BranchDialogComponent {
       name: [''],
       code: [''],
       address:[''],
-      pnrNum:[''],
+      prnNum:[''],
       isActive: [],
     });
   }
   setupForm() {
     this.addBranchForm.patchValue({
-      name: this.branchDetails.name || '', // Fallback to empty string if value is undefined
-      code: this.branchDetails.code || '', // Fallback to empty string if value is undefined
-      isActive: this.branchDetails.isActive || false, // Fallback to false if value is undefined
+      name: this.branchDetails.name || '', 
+      code: this.branchDetails.code || '', 
+      address:this.branchDetails.address || '',
+      prnNum: this.branchDetails.prnNum || '',
+      isActive: this.branchDetails.isActive || false,
     });
   }
   getInitials(name: string): string {

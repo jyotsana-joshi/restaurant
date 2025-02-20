@@ -19,8 +19,8 @@ export class AddUserDialogComponent {
   designation: any = [];
   loading = false;
   addUserForm: FormGroup = new FormGroup({});
-  designationControl:any = new UntypedFormControl()
-  branchControl:any = new UntypedFormControl()
+  designationControl: any = new UntypedFormControl()
+  branchControl: any = new UntypedFormControl()
   constructor(private fb: FormBuilder,
     private posConfiService: POSConfigurationService,
     private dialogRef: MatDialogRef<AddUserDialogComponent>,
@@ -40,19 +40,19 @@ export class AddUserDialogComponent {
   ngOnInit(): void {
     this.getDesignations();
     this.getBranches();
-    this.designationControl.valueChanges.subscribe((val:any) =>{
+    this.designationControl.valueChanges.subscribe((val: any) => {
       console.log('val: ', val);
-      if(val == 1 || val == 2){
+      if (val == 1 || val == 2) {
         this.addUserForm.controls['branchId'].disable();
         this.addUserForm.controls['password'].enable();
-      }else if(val === 3){
+      } else if (val === 3) {
         this.addUserForm.controls['password'].disable();
       }
     });
-    this.branchControl.valueChanges.subscribe((val:any) =>{
-      if(val){
+    this.branchControl.valueChanges.subscribe((val: any) => {
+      if (val) {
         this.addUserForm.controls['designationId'].disable();
-      }else{
+      } else {
         this.addUserForm.controls['designationId'].enable();
       }
     });
@@ -85,7 +85,7 @@ export class AddUserDialogComponent {
       username: [''],
       firstName: [''],
       lastName: [''],
-      password: [{value:'', disable:false}],
+      password: [{ value: '', disable: false }],
       designationId: [''],
       branchId: [''],
     });
@@ -96,13 +96,21 @@ export class AddUserDialogComponent {
   }
   setupForm() {
     this.addUserForm.patchValue({
-      name: this.userDetails.username , // Fallback to empty string if value is undefined
+      username: this.userDetails.username, // Fallback to empty string if value is undefined
       firstName: this.userDetails.firstName,
       lastName: this.userDetails.lastName,
       password: null,
-      designationId: this.userDetails?.designation?.id,
-      branchId: this.userDetails?.branch?.id,
+      designationId: this.userDetails?.designation?.id || null,
+      branchId: this.userDetails?.branch?.id || null,
     });
+    // Disable controls based on the conditions
+    if (this.userDetails?.designation?.id) {
+      this.addUserForm.controls['branchId'].disable();
+      this.addUserForm.controls['designationId'].enable();
+    } else if (this.userDetails?.branch?.id) {
+      this.addUserForm.controls['designationId'].disable();
+      this.addUserForm.controls['branchId'].enable();
+    }
   }
   // Handle form submission
   onSave() {
@@ -152,7 +160,7 @@ export class AddUserDialogComponent {
 
   getUpdatedData(): any {
     const updatedData: any = {};
-    const currentValues = this.addUserForm.value;
+    const currentValues = this.addUserForm.getRawValue();
 
     Object.keys(currentValues).forEach(key => {
       if (currentValues[key] !== this.data.userDetails[key]) {
@@ -163,7 +171,7 @@ export class AddUserDialogComponent {
     return updatedData;
   }
 
-  clearSelection(formControl:any){
+  clearSelection(formControl: any) {
     this.addUserForm.controls[formControl].setValue(null)
     this.addUserForm.controls['designationId'].enable();
     this.addUserForm.controls['branchId'].enable();

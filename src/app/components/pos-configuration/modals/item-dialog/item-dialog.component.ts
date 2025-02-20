@@ -100,7 +100,7 @@ export class ItemDialogComponent {
     this.addItemForm.patchValue({
       name: this.itemDetails?.name || '',
       price: this.itemDetails?.price || '',
-      offer: this.itemDetails?.offer || '',
+      offer: this.itemDetails?.offer || null,
       printer: this.itemDetails?.printer || '',
       categoryId: this.itemDetails?.outletMenu?.id || '',
       isActive: this.itemDetails?.isActive || false,

@@ -47,7 +47,7 @@
         <ng-container matColumnDef="designation">
           <th mat-header-cell *matHeaderCellDef> Designation </th>
           <td mat-cell *matCellDef="let element">
-            <p class="mb-0 fw-medium">{{element?.designation}}</p>
+            <p class="mb-0 fw-medium">{{element?.designation?.name}}</p>
           </td>
         </ng-container>
         <ng-container matColumnDef="phone">

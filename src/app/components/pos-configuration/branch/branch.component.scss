@@ -49,3 +49,11 @@
   .delete-spinner {
     margin: 0 auto; /* Center the spinner within the wrapper */
   }
+
+  .logo-image {
+    width: 50px;    /* Adjust the size as needed */
+    height: 50px;   /* This ensures the image is square */
+    object-fit: cover; /* This ensures the image maintains aspect ratio */
+    border-radius: 4px; /* Optional: Add rounded corners */
+  }
+  

@@ -7,6 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface PeriodicElement {
   id: number;
+  logo:string;
   name: string;
   work: string;
   project: string;
@@ -22,7 +23,7 @@ export interface PeriodicElement {
   styleUrls: ['./branch.component.scss']
 })
 export class BranchComponent {
-  displayedColumns: string[] = ['id', 'name', 'code', 'address','prnNum','active', 'actions'];
+  displayedColumns: string[] = ['id', 'logo', 'name', 'code', 'address','prnNum','active', 'actions'];
   dataSource: any;
 
   loading = false;
@@ -40,6 +41,7 @@ export class BranchComponent {
         if (response.data.branches.length > 0) {
           this.loading = false;
           this.dataSource = response.data.branches;
+          console.log('dataSource: ', this.dataSource);
           this.dataSource.map((el: any) => {
             el.loading = false;
           });

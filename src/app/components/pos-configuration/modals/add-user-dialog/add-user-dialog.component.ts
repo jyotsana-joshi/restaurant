@@ -47,6 +47,7 @@ export class AddUserDialogComponent {
         this.addUserForm.controls['password'].enable();
       } else if (val === 3) {
         this.addUserForm.controls['password'].disable();
+        this.addUserForm.controls['branchId'].disable();
       }
     });
     this.branchControl.valueChanges.subscribe((val: any) => {

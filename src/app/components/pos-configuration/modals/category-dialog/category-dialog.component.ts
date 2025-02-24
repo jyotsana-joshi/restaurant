@@ -39,7 +39,7 @@ export class CategoryDialogComponent {
     this.addcategoryForm = this.fb.group({
       name: [''],
       printer: [],
-      isActive: [false],
+      isActive: [true],
     });
   }
   setupForm() {

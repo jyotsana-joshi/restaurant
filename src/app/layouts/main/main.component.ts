@@ -44,16 +44,16 @@ export class MainComponent {
         { menu: 'Items', icon: 'list', link: '/items' },
       ],
     },
-    {
-      menu: 'Reports',
-      icon: 'bar-chart-2',
-      link: '/reports',
-    },
-    {
-      link: "/forms",
-      icon: "layout",
-      menu: "Forms",
-    },
+    // {
+    //   menu: 'Reports',
+    //   icon: 'bar-chart-2',
+    //   link: '/reports',
+    // },
+    // {
+    //   link: "/forms",
+    //   icon: "layout",
+    //   menu: "Forms",
+    // },
   ];
   routerActive: string = "activelink";
   showSubmenu: boolean = false;

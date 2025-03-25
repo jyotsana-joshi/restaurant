@@ -15,7 +15,9 @@
         </mat-form-field> -->
         <mat-form-field class="flex-1 fs-16" appearance="outline">
           <mat-label>Printer</mat-label>
-          <input matInput type="text" formControlName="printer" placeholder="Printer Name" />
+          <mat-select formControlName="printer">
+            <mat-option *ngFor="let print of printerList" [value]="print.id">{{ print.name }}</mat-option>
+          </mat-select>
         </mat-form-field> 
         <mat-form-field class="flex-1 fs-16" appearance="outline">
           <mat-label>Select Category</mat-label>

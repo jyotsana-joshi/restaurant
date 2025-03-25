@@ -14,13 +14,13 @@
         <table mat-table [dataSource]="dataSource" class="text-nowrap w-100">
           <!-- Id Column -->
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef> Id </th>
+            <th mat-header-cell *matHeaderCellDef class="sticky-header"> Id </th>
             <td mat-cell class="fw-medium" *matCellDef="let element"> {{element.id}} </td>
           </ng-container>
 
            <!-- Logo Column -->
            <ng-container matColumnDef="logo">
-            <th mat-header-cell *matHeaderCellDef> Logo </th>
+            <th mat-header-cell *matHeaderCellDef class="sticky-header"> Logo </th>
             <td mat-cell *matCellDef="let element">
               <img [src]="element.logo" alt="Logo" class="logo-image" />
             </td>
@@ -29,7 +29,7 @@
   
           <!-- Name Column -->
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef> Name </th>
+            <th mat-header-cell *matHeaderCellDef class="sticky-header"> Name </th>
             <td mat-cell *matCellDef="let element">
               <span class="mb-0 fw-medium">{{element.name}}</span>
             </td>
@@ -37,27 +37,27 @@
   
           <!-- Short Name Column -->
           <ng-container matColumnDef="code">
-            <th mat-header-cell *matHeaderCellDef> Short Name </th>
+            <th mat-header-cell *matHeaderCellDef class="sticky-header"> Short Name </th>
             <td mat-cell *matCellDef="let element">
               <span class="mb-0 fw-medium">{{element.code}}</span>
             </td>
           </ng-container>
   
           <ng-container matColumnDef="address">
-            <th mat-header-cell *matHeaderCellDef> Branch Address </th>
+            <th mat-header-cell *matHeaderCellDef class="sticky-header"> Branch Address </th>
             <td mat-cell *matCellDef="let element">
               <span class="mb-0 fw-medium">{{element.address}}</span>
             </td>
           </ng-container>
           <ng-container matColumnDef="prnNum">
-            <th mat-header-cell *matHeaderCellDef> TNR Number </th>
+            <th mat-header-cell *matHeaderCellDef class="sticky-header"> TNR Number </th>
             <td mat-cell *matCellDef="let element">
               <span class="mb-0 fw-medium">{{element.prnNum}}</span>
             </td>
           </ng-container>
           <!-- Active Column -->
           <ng-container matColumnDef="active">
-            <th mat-header-cell *matHeaderCellDef> Active </th>
+            <th mat-header-cell *matHeaderCellDef class="sticky-header"> Active </th>
             <td mat-cell *matCellDef="let element">
               <p class="badge badge-success rounded-pill" *ngIf="element.isActive">Yes</p>
               <p class="badge badge-danger rounded-pill" *ngIf="!element.isActive">No</p>
@@ -66,7 +66,7 @@
   
           <!-- Actions Column -->
           <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef> Actions </th>
+            <th mat-header-cell *matHeaderCellDef class="sticky-header"> Actions </th>
             <td mat-cell *matCellDef="let element">
               <i-feather name="edit" class="feather-base me-12" (click)="editBranch(element)"></i-feather>
               <span class="action-wrapper">

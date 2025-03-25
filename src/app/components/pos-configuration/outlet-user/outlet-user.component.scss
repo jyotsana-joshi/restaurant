@@ -42,3 +42,28 @@
   .delete-spinner {
     margin: 0 auto; /* Center the spinner within the wrapper */
   }
+
+   /* Make the table container scrollable */
+.table-container {
+  max-height: 800px; /* Adjust as needed */
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid #ddd;
+}
+
+/* Make the table header sticky */
+th.mat-header-cell {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: white;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Optional: Add border for better visibility */
+th.mat-header-cell::after {
+  content: "";
+  display: block;
+  width: 100%;
+  border-bottom: 1px solid #ddd;
+}

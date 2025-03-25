@@ -16,6 +16,10 @@ export class ItemDialogComponent {
   isEdit: boolean = false;
   buttonText = 'Add';
   categoryList: any = []
+  printerList: any = [{
+    name:'K1',
+    id: 'K1'
+  }]
   transactionTypes: any;
   transactionTypeErrors: boolean[] = [];
   constructor(private fb: FormBuilder,

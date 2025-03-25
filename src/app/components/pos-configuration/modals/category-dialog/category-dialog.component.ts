@@ -15,7 +15,11 @@ export class CategoryDialogComponent {
   categoryDetails: any
   isEdit: boolean = false;
   buttonText = 'Add';
-  branchList: any = []
+  branchList: any = [];
+  printerList: any = [{
+    name:'K1',
+    id: 'K1'
+  }]
   constructor(private fb: FormBuilder,
     private dialogRef: MatDialogRef<CategoryDialogComponent>,
     private posConfiService: POSConfigurationService,

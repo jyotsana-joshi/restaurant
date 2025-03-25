@@ -15,7 +15,7 @@ const routes: Routes = [
     path:"",
     component:MainComponent,
     children: [
-      {path:"", redirectTo:"/home", pathMatch:"full"},
+      {path:"", redirectTo:"/user-list", pathMatch:"full"},
       {path:"home", component:DashboardComponent, canActivate: [AuthGuard]},
       {path:"user-list", component:OutletUserComponent, canActivate: [AuthGuard]},
       {path:"branches", component:BranchComponent, canActivate: [AuthGuard]},
@@ -24,8 +24,8 @@ const routes: Routes = [
     ]
   },
   {path:"sign-in", component:SignInComponent, canActivate: [NoAuthGuard]},
-  {path:"", redirectTo:"/home", pathMatch:"full"},
-  {path:"**", redirectTo:"/home", pathMatch:"full"},
+  {path:"", redirectTo:"/user-list", pathMatch:"full"},
+  {path:"**", redirectTo:"/user-list", pathMatch:"full"},
 ];
 
 @NgModule({

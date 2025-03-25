@@ -74,3 +74,10 @@ th.mat-header-cell::after {
   width: 100%;
   border-bottom: 1px solid #ddd;
 }
+  .logo-image {
+    width: 50px;    /* Adjust the size as needed */
+    height: 50px;   /* This ensures the image is square */
+    object-fit: cover; /* This ensures the image maintains aspect ratio */
+    border-radius: 4px; /* Optional: Add rounded corners */
+  }
+  

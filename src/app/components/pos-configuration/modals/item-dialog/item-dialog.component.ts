@@ -48,7 +48,7 @@ export class ItemDialogComponent {
       name: [''],
       offer: [],
       categoryId: [],
-      isActive: [false],
+      isActive: [true],
       printer: [],
       price: this.fb.array([], this.duplicateTransactionValidator())
     });

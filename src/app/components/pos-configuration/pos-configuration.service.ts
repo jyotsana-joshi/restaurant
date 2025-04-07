@@ -16,7 +16,7 @@ export class POSConfigurationService {
   }
   
   getUsers() {
-    return this.httpClient.get(`${this.ApiUrl}user?offset=0&limit=100&orderDir=ASC&orderBy=id`);
+    return this.httpClient.get(`${this.ApiUrl}user?offset=0&limit=1000&orderDir=ASC&orderBy=id`);
   }
   addUser(payload: any) {
     return this.httpClient.post(`${this.ApiUrl}user/add`, payload);
@@ -29,7 +29,7 @@ export class POSConfigurationService {
     return this.httpClient.delete(`${this.ApiUrl}user`, { body: userIds });
   }
   getBranches() {
-    return this.httpClient.get(`${this.ApiUrl}branches?offset=0&limit=50&orderDir=ASC&orderBy=id`);
+    return this.httpClient.get(`${this.ApiUrl}branches?offset=0&limit=500&orderDir=ASC&orderBy=id`);
   }
   addBranches(payload: any) {
     return this.httpClient.post(`${this.ApiUrl}branches/add`, payload);
@@ -43,7 +43,7 @@ export class POSConfigurationService {
   }
 
   getCategories() {
-    return this.httpClient.get(`${this.ApiUrl}outlet-menu?offset=0&limit=500&orderDir=ASC&orderBy=id`);
+    return this.httpClient.get(`${this.ApiUrl}outlet-menu?offset=0&limit=5000&orderDir=ASC&orderBy=id`);
   }
 
   addCategories(payload: any) {
@@ -60,7 +60,7 @@ export class POSConfigurationService {
   }
 
   getItems() {
-    return this.httpClient.get(`${this.ApiUrl}sub-menu?offset=0&limit=500&orderDir=ASC&orderBy=id`);
+    return this.httpClient.get(`${this.ApiUrl}sub-menu?offset=0&limit=5000&orderDir=ASC&orderBy=id`);
   }
 
   addItem(payload: any) {
@@ -77,7 +77,7 @@ export class POSConfigurationService {
   }
 
   getTransactionTypes() {
-    return this.httpClient.get(`${this.ApiUrl}tran-type?offset=0&limit=50&orderDir=ASC&orderBy=id`);
+    return this.httpClient.get(`${this.ApiUrl}tran-type?offset=0&limit=500&orderDir=ASC&orderBy=id`);
   }
 
   addTransactionType(payload: any) {
@@ -98,11 +98,11 @@ export class POSConfigurationService {
   }
 
   getTransctionType(){
-    return this.httpClient.get(`${this.ApiUrl}tran-type?offset=0&limit=50&orderDir=DESC&orderBy=id`);
+    return this.httpClient.get(`${this.ApiUrl}tran-type?offset=0&limit=500&orderDir=DESC&orderBy=id`);
   }
 
   getCustomers() {
-    return this.httpClient.get(`${this.ApiUrl}customer-management?offset=0&limit=10000&orderDir=DESC&orderBy=id`);
+    return this.httpClient.get(`${this.ApiUrl}customer-management?offset=0&limit=100000&orderDir=DESC&orderBy=id`);
   }
 
   addCustomer(payload: any) {

@@ -3,7 +3,7 @@ import { POSConfigurationService } from '../pos-configuration.service';
 import { AddUserDialogComponent } from '../modals/add-user-dialog/add-user-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { BranchDialogComponent } from '../modals/branch-dialog/branch-dialog.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastrService } from 'ngx-toastr';
 
 export interface PeriodicElement {
   id: number;
@@ -28,7 +28,7 @@ export class BranchComponent {
 
   loading = false;
 
-  constructor(private posConfiService: POSConfigurationService, private dialog: MatDialog, private snackBar: MatSnackBar) { }
+  constructor(private posConfiService: POSConfigurationService, private dialog: MatDialog, private toastrService: ToastrService) { }
 
   ngOnInit(): void {
     this.getBranches();
@@ -49,7 +49,7 @@ export class BranchComponent {
       },
       (error) => {
         this.loading = false;
-        console.log(error, "error")
+        this.toastrService.error(error?.error?.message, 'Branch');
       })
   }
 
@@ -90,15 +90,12 @@ export class BranchComponent {
         console.log(response)
         this.dataSource = this.dataSource.filter((branch:any) => branch.id !== element.id);
         element.loading = false;
-        this.snackBar.open('Branch deleted successfully', 'Close', {
-          duration: 2000,
-        });
+        this.toastrService.success(response.message, 'Category');
+
       }, (error) => {
-        console.log(error, "error");
         element.loading = false;
-        this.snackBar.open('Failed to delete branch', 'Close', {
-          duration: 2000,
-        });
+        this.toastrService.success(error?.error?.message, 'Category');
+
 
       }
     )

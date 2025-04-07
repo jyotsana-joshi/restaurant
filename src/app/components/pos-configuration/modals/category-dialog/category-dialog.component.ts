@@ -29,7 +29,6 @@ export class CategoryDialogComponent {
     this.createForm();
     if (this.data.categoryDetails) {
       this.categoryDetails = this.data.categoryDetails;
-      console.log(this.categoryDetails, "category details");
       this.setupForm()
     }
     this.isEdit = this.data.isEdit;
@@ -62,14 +61,13 @@ export class CategoryDialogComponent {
         (response: any) => {
           this.loading = false;
           if (response.message) {
-            this.toastrService.success("Category Added successfully", 'Category');
+            this.toastrService.success(response.message, 'Category');
             this.dialogRef.close({ success: true })
           }
 
         }, (error: any) => {
           this.loading = false;
-          console.log(error, "error")
-          this.toastrService.error('Error in editing category', 'Category');
+          this.toastrService.error(error?.error?.message, 'Category');
         })
     } else {
       if (this.addcategoryForm.valid) {
@@ -79,15 +77,13 @@ export class CategoryDialogComponent {
           (response: any) => {
             if (response.data) {
               this.loading = false;
-              this.toastrService.success('Category Added successfully', 'Category');
+              this.toastrService.success(response.message, 'Category');
               this.dialogRef.close({ success: true });
             }
           },
           (error: any) => {
             this.loading = false;
-            console.log(error, "error")
-            this.toastrService.error('Error in adding category', 'Category');
-
+            this.toastrService.error(error?.error?.message, 'Category');
           }
         )
       }

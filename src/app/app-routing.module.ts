@@ -9,6 +9,7 @@ import { BranchComponent } from './components/pos-configuration/branch/branch.co
 import { CategoriesComponent } from './components/pos-configuration/categories/categories.component';
 import { NoAuthGuard } from './utils/guard/no-auth.guard';
 import { ItemsComponent } from './components/pos-configuration/items/items.component';
+import { CustomersComponent } from './components/pos-configuration/customers/customers.component';
 
 const routes: Routes = [
   {
@@ -21,6 +22,7 @@ const routes: Routes = [
       {path:"branches", component:BranchComponent, canActivate: [AuthGuard]},
       {path:"categories", component:CategoriesComponent, canActivate: [AuthGuard]},
       {path:"items", component:ItemsComponent, canActivate: [AuthGuard]},
+      {path:"customers", component:CustomersComponent, canActivate: [AuthGuard]},
     ]
   },
   {path:"sign-in", component:SignInComponent, canActivate: [NoAuthGuard]},

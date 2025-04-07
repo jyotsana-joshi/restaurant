@@ -44,8 +44,7 @@ export class SignInComponent {
         },
         (error) => {
           this.loading = false;
-          this.toastrService.error(error.error.message, "Error while login",);
-          console.log(error, "error");
+          this.toastrService.error(error?.error?.message, "Login",);
         }
       )
     } else {

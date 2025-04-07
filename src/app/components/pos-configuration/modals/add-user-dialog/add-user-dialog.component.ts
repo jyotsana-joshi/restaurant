@@ -30,7 +30,6 @@ export class AddUserDialogComponent {
     this.createForm();
     if (this.data.userDetails) {
       this.userDetails = this.data.userDetails;
-      console.log(this.userDetails, "user details");
       this.setupForm()
     }
     this.isEdit = this.data.isEdit;
@@ -41,7 +40,6 @@ export class AddUserDialogComponent {
     this.getDesignations();
     this.getBranches();
     this.designationControl.valueChanges.subscribe((val: any) => {
-      console.log('val: ', val);
       if (val == 1 || val == 2) {
         this.addUserForm.controls['branchId'].disable();
         this.addUserForm.controls['password'].enable();
@@ -62,7 +60,6 @@ export class AddUserDialogComponent {
   getDesignations() {
     this.posConfiService.getDesignations().subscribe(
       (response: any) => {
-        console.log('response: ', response);
         this.designation = response.data;
       },
       (error: any) => {
@@ -72,7 +69,6 @@ export class AddUserDialogComponent {
   getBranches() {
     this.posConfiService.getBranches().subscribe(
       (response: any) => {
-        console.log('response: ', response);
         if (response.data.branches.length > 0) {
           this.branchList = response.data.branches;
         }
@@ -115,11 +111,9 @@ export class AddUserDialogComponent {
   }
   // Handle form submission
   onSave() {
-    console.log('this.isEdit: ', this.isEdit);
     if (this.isEdit) {
       this.loading = true;
       const updatedData = this.getUpdatedData()
-      console.log('updatedData: ', updatedData);
       this.posConfiService.editUser(updatedData, this.userDetails.id).subscribe(
         (response: any) => {
           this.loading = false;
@@ -128,12 +122,9 @@ export class AddUserDialogComponent {
             this.dialogRef.close({ success: true })
           }
 
-          console.log('response: ', response);
-
         }, (error: any) => {
           this.loading = false;
-          console.log(error, "error")
-          this.toastrService.error('Error in editing user', 'User');
+          this.toastrService.error(error?.error?.message, 'User');
         })
     } else {
       if (this.addUserForm.valid) {
@@ -149,9 +140,7 @@ export class AddUserDialogComponent {
           },
           (error: any) => {
             this.loading = false;
-            console.log(error, "error")
-            this.toastrService.error('Error in adding User', 'User');
-
+            this.toastrService.error(error?.error?.message, 'User');
           }
         )
       }

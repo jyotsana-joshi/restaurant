@@ -13,6 +13,7 @@ import { CategoriesComponent } from './categories/categories.component';
 import { CategoryDialogComponent } from './modals/category-dialog/category-dialog.component';
 import { ItemsComponent } from './items/items.component';
 import { ItemDialogComponent } from './modals/item-dialog/item-dialog.component';
+import { CustomersComponent } from './customers/customers.component';
 @NgModule({
   declarations: [
     OutletUserComponent,
@@ -23,6 +24,7 @@ import { ItemDialogComponent } from './modals/item-dialog/item-dialog.component'
     CategoryDialogComponent,
     ItemsComponent,
     ItemDialogComponent,
+    CustomersComponent
   ],
   imports: [
     CommonModule,
@@ -40,6 +42,7 @@ import { ItemDialogComponent } from './modals/item-dialog/item-dialog.component'
     CategoryDialogComponent,
     ItemsComponent,
     ItemDialogComponent,
+    CustomersComponent
   ]
 })
 export class POSConfigurationModule { }

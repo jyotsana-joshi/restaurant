@@ -42,6 +42,7 @@ export class MainComponent {
         { menu: 'Branches', icon: 'layout', link: '/branches' },
         { menu: 'Categories', icon: 'list', link: '/categories' },
         { menu: 'Items', icon: 'list', link: '/items' },
+        { menu: 'Customers', icon: 'list', link: '/customers' },
       ],
     },
     // {

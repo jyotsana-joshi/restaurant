@@ -3,6 +3,7 @@ import { POSConfigurationService } from '../pos-configuration.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ItemDialogComponent } from '../modals/item-dialog/item-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastrService } from 'ngx-toastr';
 
 
 @Component({
@@ -14,9 +15,9 @@ export class ItemsComponent {
   displayedColumns: string[] = ['id', 'name', 'category', 'printer','active', 'actions'];
   dataSource:any;
   platforms: string[] = []; // Stores unique platform names
-  loading = false;
+  loading = true;
 
-  constructor(private posConfiService: POSConfigurationService, private dialog: MatDialog, private snackBar: MatSnackBar) { }
+  constructor(private posConfiService: POSConfigurationService, private dialog: MatDialog, private toastrService: ToastrService) { }
 
   ngOnInit(): void {
     this.getItems();
@@ -117,15 +118,13 @@ export class ItemsComponent {
       (response:any) =>{
         console.log(response);
         this.dataSource = this.dataSource.filter((item:any) => item.id !== element.id);
-        this.snackBar.open('Item deleted successfully', 'Close', {
-          duration: 2000,
-        });
+        this.toastrService.success(response.message, 'Item');
+
         element.loading = false;
       }, (error) =>{
         console.log(error,"error");
-        this.snackBar.open('Failed to delete item', 'Close', {
-          duration: 2000,
-        });
+        this.toastrService.success(error, 'Item');
+
         element.loading = false;
 
       }

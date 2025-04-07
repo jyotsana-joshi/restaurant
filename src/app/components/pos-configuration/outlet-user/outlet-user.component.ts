@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { POSConfigurationService } from '../pos-configuration.service';
 import { AddUserDialogComponent } from '../modals/add-user-dialog/add-user-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastrService } from 'ngx-toastr';
 
 export interface PeriodicElement {
   id: number;
@@ -25,7 +25,7 @@ export class OutletUserComponent {
 
   loading = false;
   dataSource : any= [];
-  constructor(private posConfiService: POSConfigurationService, private dialog: MatDialog, private snackBar: MatSnackBar) { }
+  constructor(private posConfiService: POSConfigurationService, private dialog: MatDialog, private toastrService: ToastrService) { }
 
   ngOnInit(): void {
     this.getUsers();
@@ -35,13 +35,11 @@ export class OutletUserComponent {
     this.loading = true;
     this.posConfiService.getUsers().subscribe(
       (response: any) => {
-        console.log('response: ', response);
         this.dataSource = response.data.users
         this.dataSource.map((el:any) =>{
           el.loading = false;
         });
         this.loading = false;
-        console.log('this.dataSource: ', this.dataSource);
 
       },
       (error) => {
@@ -83,16 +81,10 @@ export class OutletUserComponent {
         console.log(response)
         this.dataSource = this.dataSource.filter((user:any) => user.id !== element.id);
         element.loading = false;
-        this.snackBar.open('User deleted successfully', 'Close', {
-          duration: 2000,
-        });
+        this.toastrService.success(response.message, 'User');
       }, (error) => {
-        console.log(error, "error");
         element.loading = false;
-        this.snackBar.open('Failed to delete user', 'Close', {
-          duration: 2000,
-        });
-
+        this.toastrService.error(error?.error?.message, 'User');
       }
     )
   }

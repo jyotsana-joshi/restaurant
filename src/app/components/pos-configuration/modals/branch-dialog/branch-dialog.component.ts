@@ -24,7 +24,6 @@ export class BranchDialogComponent {
     this.createForm();
     if (this.data.branchDetails) {
       this.branchDetails = this.data.branchDetails;
-      console.log(this.branchDetails, "branch details");
       this.setupForm()
     }
     this.isEdit = this.data.isEdit;
@@ -59,11 +58,9 @@ export class BranchDialogComponent {
   }
   // Handle form submission
   onSave() {
-    console.log('this.isEdit: ', this.isEdit);
     if (this.isEdit) {
       this.loading = true;
       const updatedData = this.getUpdatedData()
-      console.log('updatedData: ', updatedData);
       this.posConfiService.editBranches(updatedData, this.branchDetails.id).subscribe(
         (response: any) => {
           this.loading = false;
@@ -71,13 +68,9 @@ export class BranchDialogComponent {
             this.toastrService.success(response.message);
             this.dialogRef.close({success: true})
           }
-
-          console.log('response: ', response);
-
         },(error:any) =>{
           this.loading = false;
-            console.log(error, "error")
-            this.toastrService.error('Error in editing branch', 'Branch');
+            this.toastrService.error(error?.error?.message, 'Branch');
         })
     } else {
       if (this.addBranchForm.valid) {
@@ -93,8 +86,7 @@ export class BranchDialogComponent {
           },
           (error: any) => {
             this.loading = false;
-            console.log(error, "error")
-            this.toastrService.error('Error in adding branch', 'Branch');
+            this.toastrService.error(error?.error?.message, 'Branch');
 
           }
         )

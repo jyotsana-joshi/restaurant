@@ -78,20 +78,15 @@ export class ItemDialogComponent {
     return (formArray: AbstractControl) => {
       const transactionTypes = (formArray as FormArray).controls.map(control => control.get('platFormId')?.value);
       const duplicates = transactionTypes.filter((type, index, self) => type && self.indexOf(type) !== index);
-      console.log('duplicates: ', duplicates);
       return duplicates.length > 0 ? { duplicateTransaction: true } : null;
     };
   }
   onTransactionTypeSelect(index: number, selectedTransactionId: number) {
     // Find the full transaction object based on the selected ID
-    console.log('this.transactionTypes: ', this.transactionTypes);
     const selectedTransaction = this.transactionTypes.find((type: any) => type.id === selectedTransactionId);
-    console.log('selectedTransaction: ', selectedTransaction);
 
     if (selectedTransaction) {
       const transactionControl = this.price.at(index);
-      console.log('transactionControl: ', transactionControl);
-
       transactionControl.patchValue({
         platFormId: selectedTransaction.id,
         platForm: selectedTransaction.name,
@@ -130,7 +125,6 @@ export class ItemDialogComponent {
     if (this.isEdit) {
       this.loading = true;
       const updatedData = this.getUpdatedData()
-      console.log('updatedData: ', updatedData);
       this.posConfiService.editItem(updatedData, this.itemDetails.id).subscribe(
         (response: any) => {
           this.loading = false;
@@ -140,26 +134,23 @@ export class ItemDialogComponent {
           }
         }, (error: any) => {
           this.loading = false;
-          console.log(error, "error")
-          this.toastrService.error('Error in editing item', 'item');
+          this.toastrService.error(error?.error?.message, 'Item');
         })
     } else {
       if (this.addItemForm.valid) {
-        console.log('this.addItemForm.value: ', this.addItemForm.value);
         this.loading = true;
         this.posConfiService.addItem(this.addItemForm.value).subscribe(
           (response: any) => {
+            console.log('response: ', response);
             if (response.data) {
               this.loading = false;
-              this.toastrService.success(response.message, 'item');
               this.dialogRef.close({ success: true });
+              this.toastrService.success(response.message, 'Item');
             }
           },
           (error: any) => {
             this.loading = false;
-            console.log(error, "error")
-            this.toastrService.error('Error in adding item', 'item');
-
+            this.toastrService.error(error?.error?.message, 'Item');
           }
         )
       }

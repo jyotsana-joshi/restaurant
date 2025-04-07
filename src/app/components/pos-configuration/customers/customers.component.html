@@ -1,8 +1,8 @@
 <div class="container-fluid">
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Categories</h5>
-      <button class="btn btn-primary" (click)="addCategory()">Add Category</button>
+      <h5 class="mb-0">Customers</h5>
+      <button class="btn btn-primary" (click)="addCustomer()">Add Customer</button>
     </div>
     <div class="card-body">
       <div class="position-relative">
@@ -14,31 +14,39 @@
         </div>
 
         <!-- Table -->
-        <div *ngIf="!loading" class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+        <div *ngIf="!loading" class="table-responsive">
           <table class="table table-bordered table-hover text-nowrap">
             <thead class="table-light">
               <tr>
-                <th scope="col" style="position: sticky; top: 0; z-index: 1020; background: #f8f9fa;">Id</th>
-                <th scope="col" style="position: sticky; top: 0; z-index: 1020; background: #f8f9fa;">Name</th>
-                <th scope="col" style="position: sticky; top: 0; z-index: 1020; background: #f8f9fa;">Printer</th>
-                <th scope="col" style="position: sticky; top: 0; z-index: 1020; background: #f8f9fa;">Active</th>
-                <th scope="col" style="position: sticky; top: 0; z-index: 1020; background: #f8f9fa;">Actions</th>
+                <th scope="col">Id</th>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Address</th>
+                <th scope="col">Birthday</th>
+                <th scope="col">Anniversary Date</th>
+                <th scope="col">Active</th>
+                <th scope="col">Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let element of dataSource">
                 <td>{{ element.id }}</td>
                 <td>{{ element.name }}</td>
-                <td>{{ element.printer }}</td>
+                <td>{{ element.email }}</td>
+                <td>{{ element.phone }}</td>
+                <td>{{ element.address }} {{ element.state }} {{ element.street }}</td>
+                <td>{{ element.birthDate }}</td>
+                <td>{{ element.anniversaryDate }}</td>
                 <td>
-                  <span class="badge bg-success" *ngIf="element.isActive">Yes</span>
-                  <span class="badge bg-danger" *ngIf="!element.isActive">No</span>
+                  <span class="badge bg-success" *ngIf="element.active === 'Yes'">Yes</span>
+                  <span class="badge bg-danger" *ngIf="element.active === 'No'">No</span>
                 </td>
                 <td>
-                  <button class="btn btn-sm btn-warning me-2" (click)="editCategory(element)">
+                  <button class="btn btn-sm btn-warning me-2" (click)="editCustomer(element)">
                     <i class="bi bi-pencil"></i>
                   </button>
-                  <button class="btn btn-sm btn-danger" (click)="deleteCategory(element)" [disabled]="element.loading">
+                  <button class="btn btn-sm btn-danger" (click)="deleteCustomer(element)" [disabled]="element.loading">
                     <i class="bi bi-trash" *ngIf="!element.loading"></i>
                     <div class="spinner-border spinner-border-sm text-light" role="status" *ngIf="element.loading">
                       <span class="visually-hidden">Loading...</span>
@@ -47,7 +55,7 @@
                 </td>
               </tr>
               <tr *ngIf="!dataSource.length">
-                <td colspan="5" class="text-center">No Records Found</td>
+                <td colspan="9" class="text-center">No Records Found</td>
               </tr>
             </tbody>
           </table>

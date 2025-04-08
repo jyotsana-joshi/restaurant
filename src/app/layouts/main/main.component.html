@@ -4,63 +4,45 @@
   <mat-sidenav #drawer class="sidenav" fixedInViewport [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
     [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="(isHandset$ | async) === false">
 
-    <div class="p-16">
-      <div class="mb-16 p-4 d-flex align-items-center rounded shadow-sm" style="background: linear-gradient(135deg, #ff7e5f, #feb47b); color: white;">
-        <!-- <img src="assets/images/user2.webp" class="rounded-circle me-3 border border-light" alt="" width="40" height="40"> -->
+    <div class="p-3">
+      <div class="mb-3 p-3 d-flex align-items-center rounded shadow-sm" style="background: linear-gradient(135deg, #ff7e5f, #feb47b); color: white;">
         <span class="fw-bold fs-5">Restro Management System</span>
       </div>
 
-      <!-- <div class="pt-8">
-        <ul>
-          <li class="list-group mb-2" *ngFor="let sidenav of sidebarMenu">
-            <a matRipple [matRippleColor]="'#f7f8f443'" routerLink="{{ sidenav.link }}"
-              class="sidebar-menu w-100 d-flex align-items-center" [routerLinkActive]="routerActive">
-              <i-feather name="{{ sidenav.icon }}" class="feather-base me-12"></i-feather> <span
-                class="ps-4">{{ sidenav.menu }}</span>
-            </a>
-          </li>
-        </ul>
-      </div> -->
-      <div class="pt-8">
-        <ul>
-          <li class="list-group mb-2" *ngFor="let sidenav of sidebarMenu">
+      <div class="pt-3">
+        <ul class="list-unstyled">
+          <li class="mb-2" *ngFor="let sidenav of sidebarMenu">
             <!-- Main menu item -->
             <a
-              matRipple
-              [matRippleColor]="'#f7f8f443'"
-              class="sidebar-menu w-100 d-flex align-items-center"
+              class="sidebar-menu d-flex align-items-center p-2 text-decoration-none"
               [routerLink]="sidenav.link"
-              [routerLinkActive]="routerActive"
+              [routerLinkActive]="'active'"
               (click)="toggleSubMenu(sidenav)"
               *ngIf="!sidenav.submenu; else hasSubMenu"
             >
-              <i-feather name="{{ sidenav.icon }}" class="feather-base me-12"></i-feather>
-              <span class="ps-4">{{ sidenav.menu }}</span>
+              <i class="bi bi-{{ sidenav.icon }} me-2"></i>
+              <span>{{ sidenav.menu }}</span>
             </a>
-      
+
             <!-- Submenu trigger -->
             <ng-template #hasSubMenu>
               <a
-                matRipple
-                [matRippleColor]="'#f7f8f443'"
-                class="sidebar-menu w-100 d-flex align-items-center"
+                class="sidebar-menu d-flex align-items-center p-2 text-decoration-none"
                 (click)="toggleSubMenu(sidenav)"
               >
-                <i-feather name="{{ sidenav.icon }}" class="feather-base me-12"></i-feather>
-                <span class="ps-4">{{ sidenav.menu }}</span>
-                <i-feather [name]="sidenav.isOpen ? 'chevron-down' : 'chevron-right'" class="ms-auto"></i-feather>
+                <i class="bi bi-{{ sidenav.icon }} me-2"></i>
+                <span>{{ sidenav.menu }}</span>
+                <i class="bi" [class.bi-chevron-down]="sidenav.isOpen" [class.bi-chevron-right]="!sidenav.isOpen" class="ms-auto"></i>
               </a>
-              <ul class="submenu ps-12" *ngIf="sidenav.isOpen">
-                <li *ngFor="let subItem of sidenav.submenu" class="list-group mb-2">
+              <ul class="submenu ps-4" *ngIf="sidenav.isOpen">
+                <li *ngFor="let subItem of sidenav.submenu" class="mb-2">
                   <a
-                    matRipple
-                    [matRippleColor]="'#f7f8f443'"
+                    class="sidebar-menu d-flex align-items-center p-2 text-decoration-none"
                     [routerLink]="subItem.link"
-                    class="sidebar-menu w-100 d-flex align-items-center"
-                    [routerLinkActive]="routerActive"
+                    [routerLinkActive]="'active'"
                   >
-                    <i-feather name="{{ subItem.icon }}" class="feather-base me-12"></i-feather>
-                    <span class="ps-4">{{ subItem.menu }}</span>
+                    <i class="bi bi-{{ subItem.icon }} me-2"></i>
+                    <span>{{ subItem.menu }}</span>
                   </a>
                 </li>
               </ul>
@@ -68,21 +50,27 @@
           </li>
         </ul>
       </div>
+      <div class="d-flex justify-content-between align-items-center p-3">
+        <button class="btn btn-primary" (click)="openBillingScreen()">Open Billing Screen</button>
+        </div>
     </div>
-   
+
   </mat-sidenav>
 
   <mat-sidenav-content>
 
     <!-- Header -->
-    <mat-toolbar class="header ps-24 pe-24">
-      <button type="button" class="ms-4" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle()"
-        *ngIf="isHandset$ | async">
-        <i-feather name="menu" class="text-light-muted feather-base mt-n3"></i-feather>
+    <mat-toolbar class="header d-flex align-items-center ps-3 pe-3">
+      <button type="button" class="btn btn-light me-3" aria-label="Toggle sidenav" (click)="drawer.toggle()" *ngIf="isHandset$ | async">
+        <i class="bi bi-list"></i>
       </button>
-      <button mat-icon-button class="ms-4 me-4" (click)="search=!search">
-        <i-feather name="search" class="mt-n3 text-light-muted feather-base text-dark"></i-feather>
+      <button class="btn btn-light me-3" (click)="search=!search">
+        <i class="bi bi-search"></i>
       </button>
+      <!-- <div class="user-display d-flex align-items-center me-auto">
+        <img [src]="userDetails?.profilePicture" alt="User Profile" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+        <span class="fw-bold">{{ userDetails?.username }}</span>
+        </div> -->
       <div class="ms-auto btn">
         <div>
           <button mat-button class="fs-16 pt-4 pb-4 ps-8 pe-8 text-light-muted d-flex align-items-center" >
@@ -96,8 +84,10 @@
           <button mat-flat-button color="accent" class="w-100 text-white" (click)="logout()">Logout</button>
         </div>
       </div>
+      
     </mat-toolbar>
 
+    
     <!-- Content -->
     <div class="body-wrapper">
       <div class="page-wrapper">
@@ -109,15 +99,11 @@
 
 </mat-sidenav-container>
 
-
 <!-- Search Box -->
-<div *ngIf="search" class="search-section d-flex align-items-center">
-  <mat-form-field class="w-100" color="primary" >
-    <mat-label class="fs-16">Search Here</mat-label>
-    <input matInput>
-  </mat-form-field>
-  <button mat-icon-button (click)="search=!search">
-    <i-feather name="x-circle" class="mt-n3 text-light-muted feather-base text-dark"></i-feather>
+<div *ngIf="search" class="search-section d-flex align-items-center p-3">
+  <input type="text" class="form-control me-2" placeholder="Search Here">
+  <button class="btn btn-light" (click)="search=!search">
+    <i class="bi bi-x-circle"></i>
   </button>
 </div>
 <mat-progress-bar mode="determinate" value="40"></mat-progress-bar>

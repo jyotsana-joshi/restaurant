@@ -81,9 +81,12 @@ export class ItemDialogComponent {
       return duplicates.length > 0 ? { duplicateTransaction: true } : null;
     };
   }
-  onTransactionTypeSelect(index: number, selectedTransactionId: number) {
+
+  onTransactionTypeSelect(index: number, event: any) : void{
+   
+    const numericValue = event ? parseInt(event.target.value, 10) : null;
     // Find the full transaction object based on the selected ID
-    const selectedTransaction = this.transactionTypes.find((type: any) => type.id === selectedTransactionId);
+    const selectedTransaction = this.transactionTypes.find((type: any) => type.id === numericValue);
 
     if (selectedTransaction) {
       const transactionControl = this.price.at(index);
@@ -191,6 +194,9 @@ export class ItemDialogComponent {
         }
       }
     )
+  }
+  onClose() {
+    this.dialogRef.close({ success: false });
   }
 }
 

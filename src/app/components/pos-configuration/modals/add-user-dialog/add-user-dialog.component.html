@@ -1,81 +1,129 @@
-<form [formGroup]="addUserForm">
-  <div class="card">
+<form [formGroup]="addUserForm" class="p-3">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">{{buttonText}} User</h4>
+    </div>
     <div class="card-body">
-      <h4 class="mb-32">{{buttonText}} User</h4>
+      <!-- Row with two inputs -->
+      <div class="row g-3">
+        <!-- First Name -->
+        <div class="col-md-6">
+          <label for="firstName" class="form-label">First Name</label>
+          <input
+            type="text"
+            id="firstName"
+            class="form-control"
+            formControlName="firstName"
+            placeholder="Enter First Name"
+          />
+        </div>
 
-      <!-- Row with two inputs and space between -->
-      <div class="d-flex gap-24">
-        <mat-form-field class="flex-1 fs-16" appearance="outline">
-          <mat-label>First Name</mat-label>
-          <input matInput type="text" formControlName="firstName" placeholder="First Name" />
-        </mat-form-field>
-
-        <mat-form-field class="flex-1 fs-16" appearance="outline">
-          <mat-label>Last Name</mat-label>
-          <input matInput type="text" formControlName="lastName" placeholder="Last Name" />
-        </mat-form-field>
+        <!-- Last Name -->
+        <div class="col-md-6">
+          <label for="lastName" class="form-label">Last Name</label>
+          <input
+            type="text"
+            id="lastName"
+            class="form-control"
+            formControlName="lastName"
+            placeholder="Enter Last Name"
+          />
+        </div>
       </div>
-      <!-- Row with two inputs and space between -->
-      <div class="d-flex gap-24">
-        <mat-form-field class="flex-1 fs-16" appearance="outline">
-          <mat-label>User Name</mat-label>
-          <input matInput type="text" formControlName="username" placeholder="User Name" />
-        </mat-form-field>
-        <mat-form-field class="flex-1 fs-16" appearance="outline" *ngIf="!isEdit">
-          <mat-label>Password</mat-label>
-          <input matInput type="password" formControlName="password" placeholder="Password" />
-        </mat-form-field>
-      
+
+      <!-- Row with two inputs -->
+      <div class="row g-3 mt-3">
+        <!-- User Name -->
+        <div class="col-md-6">
+          <label for="username" class="form-label">User Name</label>
+          <input
+            type="text"
+            id="username"
+            class="form-control"
+            formControlName="username"
+            placeholder="Enter User Name"
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="col-md-6" *ngIf="!isEdit">
+          <label for="password" class="form-label">Password</label>
+          <input
+            type="password"
+            id="password"
+            class="form-control"
+            formControlName="password"
+            placeholder="Enter Password"
+          />
+        </div>
       </div>
-      
-      <div class="d-flex gap-24">
-        <mat-form-field class="flex-1 fs-16" appearance="outline">
-          <mat-label>Designation</mat-label>
-          <mat-select formControlName="designationId">
-            <mat-option *ngFor="let des of designation" [value]="des.id">{{ des.name }}</mat-option>
-          </mat-select>
-          <button
-          *ngIf="addUserForm.controls['designationId'].value"
-          matSuffix
-          mat-icon-button
-          aria-label="Clear selection"
-          (click)="clearSelection('designationId')"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-        </mat-form-field>
 
-        <mat-form-field class="flex-1 fs-16" appearance="outline">
-          <mat-label>Select Outlet</mat-label>
-          <mat-select formControlName="branchId">
-            <mat-option *ngFor="let branch of branchList" [value]="branch.id">{{ branch.name }}</mat-option>
-          </mat-select>
-          <button
-          *ngIf="addUserForm.controls['branchId'].value"
-          matSuffix
-          mat-icon-button
-          aria-label="Clear selection"
-          (click)="clearSelection('branchId')"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-        </mat-form-field>
+      <!-- Row with dropdowns -->
+      <div class="row g-3 mt-3">
+        <!-- Designation -->
+        <div class="col-md-6">
+          <label for="designationId" class="form-label">Designation</label>
+          <select
+            id="designationId"
+            class="form-select"
+            formControlName="designationId"
+          >
+            <option *ngFor="let des of designation" [value]="des.id">
+              {{ des.name }}
+            </option>
+          </select>
+        </div>
 
-        <!-- <mat-slide-toggle formControlName="isActive">Active</mat-slide-toggle> -->
+        <!-- Select Outlet -->
+        <div class="col-md-6">
+          <label for="branchId" class="form-label">Select Outlet</label>
+          <select
+            id="branchId"
+            class="form-select"
+            formControlName="branchId"
+          >
+            <option *ngFor="let branch of branchList" [value]="branch.id">
+              {{ branch.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Active Toggle -->
+      <div class="row g-3 mt-3">
+        <div class="col-md-12">
+          <div class="form-check form-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="isActive"
+              formControlName="isActive"
+            />
+            <label class="form-check-label" for="isActive">Active</label>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Action buttons -->
-    <div mat-dialog-actions class="modal-btn">
-      <button mat-raised-button type="button" color="primary" (click)="onSave()" [disabled]="loading">
+    <!-- Action Buttons -->
+    <div class="card-footer d-flex justify-content-end">
+      <button
+        type="button"
+        class="btn btn-primary me-2"
+        (click)="onSave()"
+        [disabled]="loading"
+      >
         <ng-container *ngIf="!loading; else loadingSpinner">
           {{buttonText}}
         </ng-container>
         <ng-template #loadingSpinner>
-          <mat-spinner diameter="20" [strokeWidth]="2" class="me-2"></mat-spinner>
+          <span
+            class="spinner-border spinner-border-sm text-light"
+            role="status"
+          ></span>
         </ng-template>
       </button>
-      <a mat-raised-button mat-dialog-close color="warn">Close</a>
+      <button type="button" class="btn btn-danger" (click)="onClose()">Close</button>
     </div>
   </div>
 </form>

@@ -106,15 +106,15 @@ export class POSConfigurationService {
   }
 
   addCustomer(payload: any) {
-    return this.httpClient.post(`${this.ApiUrl}sub-menu/add`, payload);
+    return this.httpClient.post(`${this.ApiUrl}customer-management/add`, payload);
   }
 
-  editCustomer(payload: any, itemId: any) {
-    return this.httpClient.put(`${this.ApiUrl}customer-management/${itemId}`, payload);
+  editCustomer(payload: any, customerId: any) {
+    return this.httpClient.put(`${this.ApiUrl}customer-management/${customerId}`, payload);
   }
-  deleteCustomer(itemIds: any) {
-    console.log('categoryIds: ', itemIds);
-    return this.httpClient.delete(`${this.ApiUrl}customer-management`, { body: itemIds });
+  deleteCustomer(customerIds: any) {
+    console.log('categoryIds: ', customerIds);
+    return this.httpClient.delete(`${this.ApiUrl}customer-management`, { body: customerIds });
 
   }
 }

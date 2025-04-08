@@ -10,6 +10,7 @@ import { CategoriesComponent } from './components/pos-configuration/categories/c
 import { NoAuthGuard } from './utils/guard/no-auth.guard';
 import { ItemsComponent } from './components/pos-configuration/items/items.component';
 import { CustomersComponent } from './components/pos-configuration/customers/customers.component';
+import { BillingScreenComponent } from './billing-screen/billing-screen/billing-screen.component';
 
 const routes: Routes = [
   {
@@ -24,6 +25,11 @@ const routes: Routes = [
       {path:"items", component:ItemsComponent, canActivate: [AuthGuard]},
       {path:"customers", component:CustomersComponent, canActivate: [AuthGuard]},
     ]
+  },
+  {
+    path: 'billing-screen', // Standalone route for the billing screen
+    component: BillingScreenComponent,
+    canActivate: [AuthGuard], // Apply the AuthGuard to this route as well
   },
   {path:"sign-in", component:SignInComponent, canActivate: [NoAuthGuard]},
   {path:"", redirectTo:"/user-list", pathMatch:"full"},

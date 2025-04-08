@@ -14,6 +14,9 @@ import { CategoryDialogComponent } from './modals/category-dialog/category-dialo
 import { ItemsComponent } from './items/items.component';
 import { ItemDialogComponent } from './modals/item-dialog/item-dialog.component';
 import { CustomersComponent } from './customers/customers.component';
+import { CustomerDialogComponent } from './modals/customer-dialog/customer-dialog.component';
+import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 @NgModule({
   declarations: [
     OutletUserComponent,
@@ -24,7 +27,8 @@ import { CustomersComponent } from './customers/customers.component';
     CategoryDialogComponent,
     ItemsComponent,
     ItemDialogComponent,
-    CustomersComponent
+    CustomersComponent,
+    CustomerDialogComponent
   ],
   imports: [
     CommonModule,
@@ -32,7 +36,8 @@ import { CustomersComponent } from './customers/customers.component';
     AngularMaterialModule,
     ReactiveFormsModule,
     FeatherModule,
-
+    BsDatepickerModule.forRoot(),
+    BrowserAnimationsModule
   ],
   exports: [
     OutletUserComponent,
@@ -42,7 +47,8 @@ import { CustomersComponent } from './customers/customers.component';
     CategoryDialogComponent,
     ItemsComponent,
     ItemDialogComponent,
-    CustomersComponent
+    CustomersComponent,
+    CustomerDialogComponent
   ]
 })
 export class POSConfigurationModule { }

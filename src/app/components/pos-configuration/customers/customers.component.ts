@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { POSConfigurationService } from '../pos-configuration.service';
 import { MatDialog } from '@angular/material/dialog';
-import { ItemDialogComponent } from '../modals/item-dialog/item-dialog.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ToastrService } from 'ngx-toastr';
+import { CustomerDialogComponent } from '../modals/customer-dialog/customer-dialog.component';
 
 
 @Component({
@@ -20,14 +19,19 @@ export class CustomersComponent {
   constructor(private posConfiService: POSConfigurationService, private dialog: MatDialog, private toastrService: ToastrService) { }
 
   ngOnInit(): void {
-    this.getItems();
+    this.getCustomers();
   }
-  getItems() {
+  getCustomers() {
     this.loading = true;
     this.posConfiService.getCustomers().subscribe(
       (response: any) => {
         if(response.data.customers.length > 0){
-          this.dataSource = response.data.customers
+          this.dataSource = response.data.customers.map((item:any) => {
+            return {
+              ...item,
+              uniqueId: item.uniqueId.replace(/_/g, '-')
+            };
+          });
           this.loading = false;
         }else{
           this.loading = false;
@@ -40,7 +44,7 @@ export class CustomersComponent {
 
 
   addCustomer(){
-    const dialogRef = this.dialog.open(ItemDialogComponent, {
+    const dialogRef = this.dialog.open(CustomerDialogComponent, {
       width: '600px',
       height:'auto',
       data: {isEdit: false}
@@ -48,20 +52,20 @@ export class CustomersComponent {
 
     dialogRef.afterClosed().subscribe((result:any) => {
       if (result.success) {
-        this.getItems()
+        this.getCustomers()
       }
     });
   }
   editCustomer(element: any): void {
-    const dialogRef = this.dialog.open(ItemDialogComponent, {
+    const dialogRef = this.dialog.open(CustomerDialogComponent, {
       width: '600px',
       height:'auto',
-      data: {itemDetails : element, isEdit: true}
+      data: {customerDetails : element, isEdit: true}
     });
 
     dialogRef.afterClosed().subscribe((result:any) => {
       if (result.success) {
-        this.getItems()
+        this.getCustomers()
       }
     });
   }

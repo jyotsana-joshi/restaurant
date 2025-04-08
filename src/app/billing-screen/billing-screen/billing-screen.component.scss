@@ -1,0 +1,30 @@
+.container-fluid {
+    background-color: #f8f9fa;
+  }
+  
+  .list-group-item {
+    cursor: pointer;
+  }
+  
+  .list-group-item.active {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .btn-success {
+    height: 80px;
+    font-size: 14px;
+  }
+  
+  .btn-outline-primary.active {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .table {
+    background-color: white;
+  }
+  
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f2f2f2;
+  }

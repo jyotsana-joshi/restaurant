@@ -2,7 +2,7 @@
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h5 class="mb-0">Customers</h5>
-      <button class="btn btn-primary" (click)="addCustomer()">Add Customer</button>
+      <!-- <button class="btn btn-primary" (click)="addCustomer()">Add Customer</button> -->
     </div>
     <div class="card-body">
       <div class="position-relative">
@@ -31,7 +31,7 @@
             </thead>
             <tbody>
               <tr *ngFor="let element of dataSource">
-                <td>{{ element.id }}</td>
+                <td>{{ element.uniqueId }}</td>
                 <td>{{ element.name }}</td>
                 <td>{{ element.email }}</td>
                 <td>{{ element.phone }}</td>
@@ -39,8 +39,8 @@
                 <td>{{ element.birthDate }}</td>
                 <td>{{ element.anniversaryDate }}</td>
                 <td>
-                  <span class="badge bg-success" *ngIf="element.active === 'Yes'">Yes</span>
-                  <span class="badge bg-danger" *ngIf="element.active === 'No'">No</span>
+                  <span class="badge bg-success" *ngIf="element.isActive">Yes</span>
+                  <span class="badge bg-danger" *ngIf="!element.isActive">No</span>
                 </td>
                 <td>
                   <button class="btn btn-sm btn-warning me-2" (click)="editCustomer(element)">

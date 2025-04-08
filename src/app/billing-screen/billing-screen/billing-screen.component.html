@@ -1,0 +1,116 @@
+<div class="container-fluid p-3" style="background-color: #f8f9fa; height: 100vh;">
+    <div class="row h-100">
+      <!-- Sidebar Menu -->
+      <div class="col-2 bg-light p-2 rounded shadow-sm">
+        <ul class="list-group">
+          <li
+            class="list-group-item list-group-item-action"
+            *ngFor="let category of sidebarMenu"
+            (click)="selectCategory(category)"
+            [class.active]="selectedCategory === category"
+          >
+            {{ category }}
+          </li>
+        </ul>
+      </div>
+  
+      <!-- Main Content -->
+      <div class="col-10">
+        <!-- Top Tabs -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div>
+            <button
+              class="btn btn-outline-primary me-2"
+              *ngFor="let tab of categoryTabs"
+              (click)="selectTab(tab)"
+              [class.active]="selectedTab === tab"
+            >
+              {{ tab }}
+            </button>
+          </div>
+          <div>
+            <span>Bill No: <strong>1</strong></span>
+            <span class="ms-3">Date: <strong>{{ currentDate }}</strong></span>
+          </div>
+        </div>
+  
+        <!-- Items Grid -->
+        <div class="row mb-3">
+          <div class="col">
+            <div class="row g-2">
+              <div class="col-3" *ngFor="let item of items">
+                <button class="btn btn-success w-100" (click)="addItemToOrder(item)">
+                  {{ item }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Bottom Section -->
+        <div class="row">
+          <!-- Order Details Table -->
+          <div class="col-8">
+            <table class="table table-bordered table-striped">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Rate</th>
+                  <th>Qty</th>
+                  <th>Total</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let order of orders; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ order.name }}</td>
+                  <td>{{ order.rate }}</td>
+                  <td>
+                    <input
+                      type="number"
+                      [(ngModel)]="order.qty"
+                      class="form-control form-control-sm"
+                      (change)="updateOrderTotal(order)"
+                    />
+                  </td>
+                  <td>{{ order.total }}</td>
+                  <td>
+                    <button class="btn btn-danger btn-sm" (click)="removeOrder(i)">
+                      <i class="bi bi-trash"></i> Remove
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="orders.length === 0">
+                  <td colspan="6" class="text-center">No items added</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+  
+          <!-- Payment Options -->
+          <div class="col-4">
+            <div class="mb-3">
+              <label for="paymentType" class="form-label">Payment Type</label>
+              <select id="paymentType" class="form-select">
+                <option *ngFor="let payment of paymentOptions">{{ payment }}</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="remarks" class="form-label">Remarks</label>
+              <textarea id="remarks" class="form-control"></textarea>
+            </div>
+            <div class="d-flex justify-content-between">
+              <button class="btn btn-primary" (click)="saveAndPrint()">
+                <i class="bi bi-printer"></i> Save & Print
+              </button>
+              <button class="btn btn-secondary" (click)="newBill()">
+                <i class="bi bi-file-earmark-plus"></i> New Bill
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

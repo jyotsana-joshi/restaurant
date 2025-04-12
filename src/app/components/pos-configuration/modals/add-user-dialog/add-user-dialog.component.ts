@@ -167,5 +167,9 @@ export class AddUserDialogComponent {
     this.addUserForm.controls['branchId'].enable();
     this.addUserForm.controls['password'].enable();
   }
+  onClose() {
+    this.dialogRef.close({ success: false });
+  }
+
 }
 

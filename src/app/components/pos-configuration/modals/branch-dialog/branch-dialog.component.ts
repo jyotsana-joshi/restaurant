@@ -107,5 +107,9 @@ export class BranchDialogComponent {
 
     return updatedData;
   }
+
+  onClose() {
+    this.dialogRef.close({ success: false });
+  }
 }
 

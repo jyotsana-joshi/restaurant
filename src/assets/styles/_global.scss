@@ -22,7 +22,7 @@ hr {
 }
 
 .card {
-  margin-bottom: 30px;
+  // margin-bottom: 30px;
   box-shadow: 1px 0 20px #00000014;
   border-radius: 20px;
 }
@@ -277,4 +277,14 @@ ul {
 }
 .op-5 {
   opacity: 0.5;
+}
+.bs-datepicker {
+  z-index: 3000 !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.bs-datepicker-container {
+  z-index: 3000 !important;
 }

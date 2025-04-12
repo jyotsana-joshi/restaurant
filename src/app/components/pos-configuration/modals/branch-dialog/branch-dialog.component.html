@@ -1,44 +1,93 @@
-<form [formGroup]="addBranchForm">
-  <div class="card">
+<form [formGroup]="addBranchForm" class="p-3">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">{{buttonText}} Branch</h4>
+    </div>
     <div class="card-body">
-      <h4 class="mb-32">{{buttonText}} Branch</h4>
+      <!-- Row with inputs -->
+      <div class="row g-3">
+        <!-- Branch Name -->
+        <div class="col-md-6">
+          <label for="name" class="form-label">Branch Name</label>
+          <input
+            type="text"
+            id="name"
+            class="form-control"
+            formControlName="name"
+            placeholder="Enter Branch Name"
+          />
+        </div>
 
-      <!-- Row with two inputs and space between -->
-      <div class="main-form">
-        <mat-form-field class="flex-1 fs-16" appearance="outline">
-          <mat-label>Branch Name</mat-label>
-          <input matInput type="text" formControlName="name" placeholder="Branch Name" />
-        </mat-form-field>
+        <!-- Short Name -->
+        <div class="col-md-6">
+          <label for="code" class="form-label">Short Name</label>
+          <input
+            type="text"
+            id="code"
+            class="form-control"
+            formControlName="code"
+            placeholder="Enter Short Name"
+          />
+        </div>
 
-        <mat-form-field class="flex-1 fs-16" appearance="outline">
-          <mat-label>Short Name</mat-label>
-          <input matInput type="text" formControlName="code" placeholder="Short Name" />
-        </mat-form-field>
-        <mat-form-field class="flex-1 fs-16" appearance="outline">
-          <mat-label>Address</mat-label>
-          <textarea matInput type="text" formControlName="address" placeholder="Address" ></textarea>
-        </mat-form-field>
-        <mat-form-field class="flex-1 fs-16" appearance="outline">
-          <mat-label>TRN Number</mat-label>
-          <input matInput type="text" formControlName="prnNum" placeholder="TRN Numbers" />
-        </mat-form-field>
-        <div>
-          <mat-slide-toggle formControlName="isActive">Active</mat-slide-toggle>
+        <!-- Address -->
+        <div class="col-md-12">
+          <label for="address" class="form-label">Address</label>
+          <textarea
+            id="address"
+            class="form-control"
+            formControlName="address"
+            placeholder="Enter Address"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <!-- TRN Number -->
+        <div class="col-md-6">
+          <label for="prnNum" class="form-label">TRN Number</label>
+          <input
+            type="text"
+            id="prnNum"
+            class="form-control"
+            formControlName="prnNum"
+            placeholder="Enter TRN Number"
+          />
+        </div>
+
+        <!-- Active Toggle -->
+        <div class="col-md-6 d-flex align-items-center">
+          <div class="form-check form-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="isActive"
+              formControlName="isActive"
+            />
+            <label class="form-check-label ms-2" for="isActive">Active</label>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Action buttons -->
-    <div mat-dialog-actions class="modal-btn">
-      <button mat-raised-button type="button" color="primary" (click)="onSave()" [disabled]="loading">
+    <!-- Action Buttons -->
+    <div class="card-footer d-flex justify-content-end">
+      <button
+        type="button"
+        class="btn btn-primary me-2"
+        (click)="onSave()"
+        [disabled]="loading"
+      >
         <ng-container *ngIf="!loading; else loadingSpinner">
           {{buttonText}}
         </ng-container>
         <ng-template #loadingSpinner>
-          <mat-spinner diameter="20" [strokeWidth]="2" class="me-2"></mat-spinner>
+          <span
+            class="spinner-border spinner-border-sm text-light"
+            role="status"
+          ></span>
         </ng-template>
       </button>
-      <a mat-raised-button mat-dialog-close color="warn">Close</a>
+      <button type="button" class="btn btn-danger" (click)="onClose()">Close</button>
     </div>
   </div>
 </form>

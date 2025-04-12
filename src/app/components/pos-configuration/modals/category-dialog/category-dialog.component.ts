@@ -103,5 +103,8 @@ export class CategoryDialogComponent {
 
     return updatedData;
   }
+  onClose() {
+    this.dialogRef.close({ success: false });
+  }
 }
 

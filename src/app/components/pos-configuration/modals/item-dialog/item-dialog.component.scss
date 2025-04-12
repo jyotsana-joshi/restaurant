@@ -1,40 +1,48 @@
-.mat-dialog-container {
-    max-height: 80vh; 
-    overflow: hidden; 
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .card-body {
-    max-height: 60vh; 
-    overflow-y: auto; 
-    padding-right: 10px; 
-  }
-
-.modal-btn{
-    display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-}
-.main-form{
-    display: flex;
-    flex-direction: column;
+.card {
+  border-radius: 8px;
+  max-height: 80vh; /* Increased height for better usability */
+  overflow-y: auto;
+  position: relative; /* Required for sticky positioning */
 }
 
-.transaction-row {
-    display: flex;
-    align-items: center;
-    gap: 16px; /* Adjust spacing between elements */
-    margin-bottom: 12px;
-  }
-  
-  .transaction-select,
-  .transaction-price {
-    flex: 1; /* Each field takes equal space */
-    min-width: 200px; /* Prevents shrinking too much */
-  }
-  
-  button[mat-icon-button] {
-    margin-left: 8px; /* Space between price field and remove button */
-  }
-  
+.card-header {
+  font-size: 1.25rem;
+  font-weight: bold;
+  position: sticky; /* Keeps the header static */
+  top: 0; /* Sticks the header to the top of the card */
+  z-index: 10; /* Ensures the header stays above other content */
+  background-color: #007bff; /* Matches the header background */
+  color: white; /* Ensures text is visible */
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+button {
+  min-width: 100px;
+}
+
+button.btn-primary {
+  background-color: #007bff; /* Blue color for Save button */
+  border-color: #007bff;
+}
+
+button.btn-primary:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  border-color: #004085;
+}
+
+button.btn-danger {
+  background-color: #dc3545; /* Red color for Remove button */
+  border-color: #dc3545;
+  display: flex; /* Ensures proper alignment */
+  align-items: center; /* Centers the content vertically */
+  justify-content: center; /* Centers the content horizontally */
+  height: 38px; /* Matches the height of form controls */
+  width: 38px; /* Makes the button square */
+  padding: 0; /* Removes extra padding */
+}
+
+button.btn-danger:hover {
+  background-color: #c82333; /* Darker red on hover */
+  border-color: #bd2130;
+}

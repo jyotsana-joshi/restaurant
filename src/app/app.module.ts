@@ -4,7 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AngularMaterialModule } from './angular-material-module';
 import { FeatherModule } from 'angular-feather';
 import { allIcons } from 'angular-feather/icons';
@@ -16,11 +16,13 @@ import { AuthGuard } from './utils/guard/auth.guard';
 import { ToastrModule, ToastrService } from 'ngx-toastr';
 import { POSConfigurationModule } from './components/pos-configuration/pos-configuration.module';
 import { AuthInterceptor } from './utils/interceptors/auth.service';
+import { BillingScreenModule } from './billing-screen/billing-screen.module';
+import { BsDatepickerConfig, BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 
 @NgModule({
   declarations: [
     AppComponent,
-    MainComponent
+    MainComponent,
   ],
   imports: [
     BrowserModule,
@@ -40,7 +42,10 @@ import { AuthInterceptor } from './utils/interceptors/auth.service';
       progressBar: true,  // Show progress bar
       tapToDismiss: false,
     }),
-    POSConfigurationModule
+    BsDatepickerModule.forRoot(),
+    POSConfigurationModule,
+    BillingScreenModule,
+    ReactiveFormsModule,
 
   ],
   providers: [AuthGuard,
@@ -49,7 +54,18 @@ import { AuthInterceptor } from './utils/interceptors/auth.service';
     useClass: AuthInterceptor,
     multi: true, // Important to allow multiple interceptors
   },
+  {
+    provide: BsDatepickerConfig,
+    useValue: {
+      dateInputFormat: 'YYYY/MM/DD', // Set the date format
+      isAnimated: true, // Enable animation
+      // adaptivePosition: true, // Position the datepicker adaptively
+      // containerClass: 'theme-dark-blue', // Set the theme class
+      // showWeekNumbers: false, // Hide week numbers
+    }
+  }
 ],
+
   bootstrap: [AppComponent]
 })
 export class AppModule { }

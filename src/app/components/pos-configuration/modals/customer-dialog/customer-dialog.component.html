@@ -58,28 +58,21 @@
         <div class="col-md-6">
           <label for="birthDate" class="form-label">Birthday</label>
           
-          <input
-            type="text"
-            id="birthDate"
-            class="form-control"
-            formControlName="birthDate"
-            placeholder="Select Birthday"
-            bsDatepicker
-            [bsConfig]="{ dateInputFormat: 'YYYY/MM/DD' }"
-          />
+          <mat-form-field appearance="fill" class="w-100">
+            <input matInput [matDatepicker]="picker" id="birthDate" placeholder="Choose a date" formControlName="birthDate" (dateChange)="onDateChange($event, 'birthDate')" />
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
         </div>
 
         <!-- Anniversary Date -->
         <div class="col-md-6">
           <label for="anniversaryDate" class="form-label">Anniversary Date</label>
-          <input
-            type="text"
-            id="anniversaryDate"
-            class="form-control"
-            formControlName="anniversaryDate"
-            placeholder="Select Anniversary Date"
-            bsDatepicker
-          />
+          <mat-form-field appearance="fill" class="w-100">
+          <input matInput [matDatepicker]="anniversary" id="birthDate" placeholder="Choose a date" formControlName="anniversaryDate" (dateChange)="onDateChange($event, 'anniversaryDate')" />
+          <mat-datepicker-toggle matSuffix [for]="anniversary"></mat-datepicker-toggle>
+          <mat-datepicker #anniversary></mat-datepicker>
+          </mat-form-field>
         </div>
 
         <!-- Active Toggle -->
@@ -103,9 +96,17 @@
         type="button"
         class="btn btn-primary me-2"
         (click)="onSave()"
-        [disabled]="addCustomerForm.invalid"
+        [disabled]="loading"
       >
-        Save
+        <ng-container *ngIf="!loading; else loadingSpinner">
+          {{buttonText}}
+        </ng-container>
+        <ng-template #loadingSpinner>
+          <span
+            class="spinner-border spinner-border-sm text-light"
+            role="status"
+          ></span>
+        </ng-template>
       </button>
       <button type="button" class="btn btn-danger" (click)="onClose()">Close</button>
     </div>

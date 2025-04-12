@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { POSConfigurationService } from 'src/app/components/pos-configuration/pos-configuration.service';
 
 @Component({
   selector: 'app-billing-screen',
@@ -15,6 +16,53 @@ export class BillingScreenComponent {
   selectedCategory: string | null = null;
   selectedTab: string = ''
 
+  allCategories: any[] = [];
+  isAtTop = true;
+  isAtBottom = false;
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef;
+  scrollAmount = 50; // px per click
+  constructor(private posConfiService: POSConfigurationService) {
+
+   }
+  ngOnInit() {
+    this.getCategories();
+  }
+  
+  ngAfterViewInit() {
+    this.checkScrollPosition();
+  }
+  scrollUp() {
+    const el = this.scrollContainer.nativeElement;
+    el.scrollBy({ top: -this.scrollAmount, behavior: 'smooth' });
+    setTimeout(() => this.checkScrollPosition(), 300); // allow smooth scroll to finish
+  }
+
+  scrollDown() {
+    const el = this.scrollContainer.nativeElement;
+    el.scrollBy({ top: this.scrollAmount, behavior: 'smooth' });
+    setTimeout(() => this.checkScrollPosition(), 300);
+  }
+
+  checkScrollPosition() {
+    const el = this.scrollContainer.nativeElement;
+    const scrollTop = el.scrollTop;
+    const scrollHeight = el.scrollHeight;
+    const clientHeight = el.clientHeight;
+
+    this.isAtTop = scrollTop === 0;
+    this.isAtBottom = scrollTop + clientHeight >= scrollHeight;
+  }
+  getCategories() {
+    this.posConfiService.getCategories().subscribe(
+      (response: any) => {
+        if (response.data.outletMenu.length > 0) {
+          this.allCategories = response.data.outletMenu;
+        }
+      },
+      (error) => {
+    
+      })
+  }
   selectCategory(category: string) {
     this.selectedCategory = category;
   }

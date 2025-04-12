@@ -1,116 +1,256 @@
-<div class="container-fluid p-3" style="background-color: #f8f9fa; height: 100vh;">
-    <div class="row h-100">
-      <!-- Sidebar Menu -->
-      <div class="col-2 bg-light p-2 rounded shadow-sm">
-        <ul class="list-group">
-          <li
-            class="list-group-item list-group-item-action"
-            *ngFor="let category of sidebarMenu"
-            (click)="selectCategory(category)"
-            [class.active]="selectedCategory === category"
-          >
-            {{ category }}
-          </li>
-        </ul>
+<div class="container">
+  <div class="header">
+      <div class="header-item">Master</div>
+      <div class="header-item">Add</div>
+      <div class="header-item">Advance</div>
+      <div class="header-item">Purchase</div>
+      <div class="header-item">Billing & KOT</div>
+      <div class="header-item">Receipts</div>
+      <div class="header-item">SMS</div>
+      <div class="header-item">Email</div>
+      <div class="header-item">Payments</div>
+      <div class="header-item">Display</div>
+      <div class="header-item">Reports</div>
+      <div class="header-item">Options</div>
+      <div class="header-item">About</div>
+  </div>
+  
+  <div class="main-content">
+    <div class="left-panel">
+      <div class="arrow-section">
+        <button class="arrow-btn"  (click)="scrollUp()">
+          <i class="bi bi-arrow-up-short"></i>
+        </button>
+        <button class="arrow-btn" (click)="scrollDown()">
+          <i class="bi bi-arrow-down-short"></i>
+        </button>
       </div>
-  
-      <!-- Main Content -->
-      <div class="col-10">
-        <!-- Top Tabs -->
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div>
-            <button
-              class="btn btn-outline-primary me-2"
-              *ngFor="let tab of categoryTabs"
-              (click)="selectTab(tab)"
-              [class.active]="selectedTab === tab"
-            >
-              {{ tab }}
-            </button>
-          </div>
-          <div>
-            <span>Bill No: <strong>1</strong></span>
-            <span class="ms-3">Date: <strong>{{ currentDate }}</strong></span>
-          </div>
-        </div>
-  
-        <!-- Items Grid -->
-        <div class="row mb-3">
-          <div class="col">
-            <div class="row g-2">
-              <div class="col-3" *ngFor="let item of items">
-                <button class="btn btn-success w-100" (click)="addItemToOrder(item)">
-                  {{ item }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <!-- Bottom Section -->
-        <div class="row">
-          <!-- Order Details Table -->
-          <div class="col-8">
-            <table class="table table-bordered table-striped">
-              <thead class="table-light">
-                <tr>
-                  <th>#</th>
-                  <th>Name</th>
-                  <th>Rate</th>
-                  <th>Qty</th>
-                  <th>Total</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let order of orders; let i = index">
-                  <td>{{ i + 1 }}</td>
-                  <td>{{ order.name }}</td>
-                  <td>{{ order.rate }}</td>
-                  <td>
-                    <input
-                      type="number"
-                      [(ngModel)]="order.qty"
-                      class="form-control form-control-sm"
-                      (change)="updateOrderTotal(order)"
-                    />
-                  </td>
-                  <td>{{ order.total }}</td>
-                  <td>
-                    <button class="btn btn-danger btn-sm" (click)="removeOrder(i)">
-                      <i class="bi bi-trash"></i> Remove
-                    </button>
-                  </td>
-                </tr>
-                <tr *ngIf="orders.length === 0">
-                  <td colspan="6" class="text-center">No items added</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-  
-          <!-- Payment Options -->
-          <div class="col-4">
-            <div class="mb-3">
-              <label for="paymentType" class="form-label">Payment Type</label>
-              <select id="paymentType" class="form-select">
-                <option *ngFor="let payment of paymentOptions">{{ payment }}</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="remarks" class="form-label">Remarks</label>
-              <textarea id="remarks" class="form-control"></textarea>
-            </div>
-            <div class="d-flex justify-content-between">
-              <button class="btn btn-primary" (click)="saveAndPrint()">
-                <i class="bi bi-printer"></i> Save & Print
-              </button>
-              <button class="btn btn-secondary" (click)="newBill()">
-                <i class="bi bi-file-earmark-plus"></i> New Bill
-              </button>
-            </div>
-          </div>
-        </div>
+    
+      <div class="category-buttons"  #scrollContainer>
+        <button *ngFor="let cat of allCategories"> {{cat.name}}</button>
+      </div>
+      <div class="options-section">
+      
+        <label><input type="checkbox"> Take Away</label>
+        <label><input type="checkbox"> Home Delivery</label>
+        <label> <input type="checkbox"> Table No.</label>
       </div>
     </div>
+      <div class="content-area">
+          <div class="top-nav">
+              <div>Beverage</div>
+              <div class="top-nav-right">
+                  <div>Bill NO : <select><option>1</option></select></div>
+                  <div>Dt : <input type="text" value="10/04/2025" class="date-input"></div>
+              </div>
+          </div>
+          
+          <div class="beverage-grid">
+              <div class="beverage-item" data-price="45">avacado juice</div>
+              <div class="beverage-item" data-price="30">butter milk</div>
+              <div class="beverage-item" data-price="35">butter milk (masala chhas)</div>
+              <div class="beverage-item" data-price="40">carrot juice</div>
+              <div class="beverage-item" data-price="50">cocktail juice</div>
+              <div class="beverage-item" data-price="60">cold coffee</div>
+              <div class="beverage-item" data-price="20">dip tea</div>
+              <div class="beverage-item" data-price="35">fresh lime soda/water</div>
+              <div class="beverage-item" data-price="60">ice gola bhama special</div>
+              <div class="beverage-item" data-price="50">ice gola in bowl</div>
+              <div class="beverage-item" data-price="40">ice gola in stick</div>
+              <div class="beverage-item" data-price="45">mango juice</div>
+              <div class="beverage-item" data-price="25">masala tea</div>
+              <div class="beverage-item" data-price="70">milk shake</div>
+              <div class="beverage-item" data-price="35">nes coffee</div>
+              <div class="beverage-item" data-price="45">orange juice</div>
+              <div class="beverage-item" data-price="45">pineapple juice</div>
+              <div class="beverage-item" data-price="15">sada tea</div>
+              <div class="beverage-item" data-price="30">soft drinks</div>
+              <div class="beverage-item" data-price="50">sweet lassi / salt</div>
+              <div class="beverage-item" data-price="70">sweet lassi with ice cream</div>
+              <div class="beverage-item" data-price="40">sweet melon juice</div>
+              <div class="beverage-item" data-price="20">water large</div>
+              <div class="beverage-item" data-price="45">water melon juice</div>
+              <div class="beverage-item" data-price="10">water small</div>
+          </div>
+          
+          <div style="display: flex">
+              <div style="width: 85%">
+                  <div class="numpad">
+                      <div class="numpad-btn">1</div>
+                      <div class="numpad-btn">2</div>
+                      <div class="numpad-btn">3</div>
+                      <div class="numpad-btn">4</div>
+                      <div class="numpad-btn">5</div>
+                      <div class="numpad-btn">6</div>
+                      <div class="numpad-btn">7</div>
+                      <div class="numpad-btn">8</div>
+                      <div class="numpad-btn">9</div>
+                      <div class="numpad-btn">0</div>
+                      <div class="numpad-btn">.</div>
+                  </div>
+                  
+                  <div class="table-container">
+                      <table class="order-table" id="orderTable">
+                          <thead>
+                              <tr>
+                                  <th>C...</th>
+                                  <th>Name</th>
+                                  <th>Rate</th>
+                                  <th>Qty</th>
+                                  <th>Total</th>
+                              </tr>
+                          </thead>
+                        <tbody id="orderTableBody">
+                              <!-- Dummy Order Data -->
+                              <tr class="selected">
+                                  <td>1</td>
+                                  <td>cold coffee</td>
+                                  <td>60.00</td>
+                                  <td>2</td>
+                                  <td>120.00</td>
+                              </tr>
+                              <tr>
+                                  <td>2</td>
+                                  <td>masala tea</td>
+                                  <td>25.00</td>
+                                  <td>1</td>
+                                  <td>25.00</td>
+                              </tr>
+                              <tr>
+                                  <td>3</td>
+                                  <td>orange juice</td>
+                                  <td>45.00</td>
+                                  <td>3</td>
+                                  <td>135.00</td>
+                              </tr>
+                              <tr>
+                                  <td>4</td>
+                                  <td>sweet lassi with ice cream</td>
+                                  <td>70.00</td>
+                                  <td>1</td>
+                                  <td>70.00</td>
+                              </tr>
+                              <tr>
+                                  <td>5</td>
+                                  <td>water large</td>
+                                  <td>20.00</td>
+                                  <td>2</td>
+                                  <td>40.00</td>
+                              </tr>
+                          </tbody>
+                      </table>
+                  </div>
+                  
+                  <div class="order-info">
+                    <div class="row">
+                      <label>Mobile :</label>
+                      <input type="text" />
+                      <label>Name :</label>
+                      <input type="text" />
+                    </div>
+                  
+                    <div class="row">
+                      <label>Add. :</label>
+                      <input type="text" class="address-input" />
+                    </div>
+                  
+                    <div class="row">
+                      <label>Rem. :</label>
+                      <input type="text" />
+                      <label>Del Boy :</label>
+                      <select>
+                        <option>Select</option>
+                      </select>
+                    </div>
+                  
+                    <div class="buttons">
+                      <button class="print-btn">Save & Print</button>
+                      <button class="bill-btn">New Bill</button>
+                    </div>
+                  </div>
+              </div>
+              
+              <div style="width: 15%; display: flex; flex-direction: column">
+                  <div class="action-buttons">
+                    <button class="action-btn btn btn-outline-danger" id="delBtn">
+                        <i class="bi bi-trash"></i> Delete
+                      </button>
+                      
+                      <button class="action-btn btn btn-outline-primary" id="plusBtn">
+                        <i class="bi bi-plus-lg"></i> Add
+                      </button>
+                      
+                      <button class="action-btn btn btn-outline-secondary" id="minusBtn">
+                        <i class="bi bi-dash-lg"></i> Remove
+                      </button>
+                      
+                      <button class="action-btn btn btn-outline-success">
+                        <i class="bi bi-save"></i> Save
+                      </button>
+                      
+                  </div>
+              </div>
+          </div>
+      </div>
+      
+      <div class="right-panel">
+          <div class="subtotal-section">
+              <div class="subtotal-row">
+                  <div>Sub Total :</div>
+                  <div class="subtotal-value" id="subTotal">0.00</div>
+              </div>
+              <div class="subtotal-row">
+                  <div>Dis. In % :</div>
+                  <select><option>%</option></select>
+                  <input type="text" value="0.00" class="input-field" style="width: 50px">
+                  <input type="text" value="0.00" class="input-field" style="width: 50px">
+              </div>
+          </div>
+          
+          <div class="payment-method">
+              <select style="width: 100%"><option>Cash</option></select>
+          </div>
+          
+          <div class="customer-info">
+              <div>Customer Name ( F10 search Customer)</div>
+              <input type="text" class="input-field" style="width: 140px">
+              <select style="width: 30px"><option></option></select>
+          </div>
+          
+          <div>
+              <div class="subtotal-row">
+                  <div>Cash :</div>
+                  <input type="text" value="0" class="input-field" style="width: 70px">
+                  <div>Card :</div>
+                  <input type="text" value="0" class="input-field" style="width: 70px">
+              </div>
+              <div class="subtotal-row">
+                  <div>No :</div>
+                  <select style="width: 70px"><option></option></select>
+                  <input type="text" class="input-field" style="width: 70px">
+              </div>
+          </div>
+          
+          <table class="bill-info-table">
+              <tr>
+                  <td>Bill :</td>
+                  <td class="bill-info-value" id="billTotal">0.00</td>
+              </tr>
+              <tr>
+                  <td>Paid :</td>
+                  <td class="bill-info-value" id="paidAmount">0.00</td>
+              </tr>
+              <tr>
+                  <td>Bal :</td>
+                  <td class="bill-info-value" id="balanceAmount">0.00</td>
+              </tr>
+          </table>
+      </div>
   </div>
+  
+  <div class="status-bar">
+      <div>Status</div>
+      <div>10/04/2025</div>
+      <div>5:16 PM</div>
+  </div>
+</div>

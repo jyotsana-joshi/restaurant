@@ -36,8 +36,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     AngularMaterialModule,
     ReactiveFormsModule,
     FeatherModule,
-    BsDatepickerModule.forRoot(),
-    BrowserAnimationsModule
   ],
   exports: [
     OutletUserComponent,

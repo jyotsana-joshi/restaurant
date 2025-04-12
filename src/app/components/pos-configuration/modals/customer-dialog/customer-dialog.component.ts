@@ -1,9 +1,10 @@
 import { Component, Inject } from '@angular/core';
-import { FormGroup, FormBuilder} from '@angular/forms';
+import { FormGroup, FormBuilder } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { POSConfigurationService } from '../../pos-configuration.service';
 import { ToastrService } from 'ngx-toastr';
-
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
+import * as moment from 'moment';
 @Component({
   selector: 'app-customer-dialog',
   templateUrl: './customer-dialog.component.html',
@@ -100,8 +101,19 @@ export class CustomerDialogComponent {
     const currentValues = this.addCustomerForm.value;
 
     Object.keys(currentValues).forEach(key => {
-      if (currentValues[key] !== this.data.customerDetails[key]) {
-        updatedData[key] = currentValues[key];
+      let currentVal = currentValues[key];
+      let originalVal = this.data.customerDetails[key];
+      if (key === 'birthDate' || key === 'anniversaryDate') {
+        const formattedCurrent = moment(currentVal).format('YYYY-MM-DD');
+        const formattedOriginal = moment(originalVal).format('YYYY-MM-DD');
+
+        if (formattedCurrent !== formattedOriginal) {
+          updatedData[key] = moment(currentVal).format('YYYY-MM-DD');
+        }
+      } else {
+        if (currentVal !== originalVal) {
+          updatedData[key] = currentVal;
+        }
       }
     });
 
@@ -110,6 +122,11 @@ export class CustomerDialogComponent {
 
   onClose() {
     this.dialogRef.close({ success: false });
+  }
+
+  onDateChange(event: MatDatepickerInputEvent<Date>, controlName: any) {
+    const selectedDate = event.value;
+    this.addCustomerForm.get(controlName)?.setValue(selectedDate);
   }
 
 }

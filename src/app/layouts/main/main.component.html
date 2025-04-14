@@ -16,7 +16,7 @@
             <a
               class="sidebar-menu d-flex align-items-center p-2 text-decoration-none"
               [routerLink]="sidenav.link"
-              [routerLinkActive]="'active'"
+              routerLinkActive="active"
               (click)="toggleSubMenu(sidenav)"
               *ngIf="!sidenav.submenu; else hasSubMenu"
             >
@@ -39,7 +39,7 @@
                   <a
                     class="sidebar-menu d-flex align-items-center p-2 text-decoration-none"
                     [routerLink]="subItem.link"
-                    [routerLinkActive]="'active'"
+                    routerLinkActive="active"
                   >
                     <i class="bi bi-{{ subItem.icon }} me-2"></i>
                     <span>{{ subItem.menu }}</span>
@@ -52,7 +52,7 @@
       </div>
       <div class="d-flex justify-content-between align-items-center p-3">
         <button class="btn btn-primary" (click)="openBillingScreen()">Open Billing Screen</button>
-        </div>
+      </div>
     </div>
 
   </mat-sidenav>
@@ -67,13 +67,9 @@
       <button class="btn btn-light me-3" (click)="search=!search">
         <i class="bi bi-search"></i>
       </button>
-      <!-- <div class="user-display d-flex align-items-center me-auto">
-        <img [src]="userDetails?.profilePicture" alt="User Profile" class="rounded-circle me-2" style="width: 40px; height: 40px;">
-        <span class="fw-bold">{{ userDetails?.username }}</span>
-        </div> -->
       <div class="ms-auto btn">
         <div>
-          <button mat-button class="fs-16 pt-4 pb-4 ps-8 pe-8 text-light-muted d-flex align-items-center" >
+          <button mat-button class="fs-16 pt-4 pb-4 ps-8 pe-8 text-light-muted d-flex align-items-center">
             <div class="d-flex align-items-center">
               <span class="fw-light ms-8 text-secondary">Hi,</span>
               <span class="fw-bold ms-8">{{userDetails.username}}</span>
@@ -84,15 +80,11 @@
           <button mat-flat-button color="accent" class="w-100 text-white" (click)="logout()">Logout</button>
         </div>
       </div>
-      
     </mat-toolbar>
 
-    
     <!-- Content -->
-    <div class="body-wrapper">
-      <div class="page-wrapper">
-        <router-outlet></router-outlet>
-      </div>
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
     </div>
 
   </mat-sidenav-content>
@@ -106,4 +98,3 @@
     <i class="bi bi-x-circle"></i>
   </button>
 </div>
-<mat-progress-bar mode="determinate" value="40"></mat-progress-bar>

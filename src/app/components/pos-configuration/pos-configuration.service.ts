@@ -101,8 +101,8 @@ export class POSConfigurationService {
     return this.httpClient.get(`${this.ApiUrl}tran-type?offset=0&limit=500&orderDir=DESC&orderBy=id`);
   }
 
-  getCustomers() {
-    return this.httpClient.get(`${this.ApiUrl}customer-management?offset=0&limit=100000&orderDir=DESC&orderBy=id`);
+  getCustomers(params: { offset: number; limit: number }) {
+    return this.httpClient.get(`${this.ApiUrl}customer-management?offset=${params.offset}&limit=${params.limit}&orderDir=ASC&orderBy=id`);
   }
 
   addCustomer(payload: any) {

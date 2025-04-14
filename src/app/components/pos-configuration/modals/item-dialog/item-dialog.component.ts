@@ -83,8 +83,9 @@ export class ItemDialogComponent {
   }
 
   onTransactionTypeSelect(index: number, event: any) : void{
+    console.log('event: ', event);
    
-    const numericValue = event ? parseInt(event.target.value, 10) : null;
+    const numericValue = event ? parseInt(event, 10) : null;
     // Find the full transaction object based on the selected ID
     const selectedTransaction = this.transactionTypes.find((type: any) => type.id === numericValue);
 

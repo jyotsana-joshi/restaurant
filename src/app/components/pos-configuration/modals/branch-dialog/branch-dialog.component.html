@@ -8,50 +8,34 @@
       <div class="row g-3">
         <!-- Branch Name -->
         <div class="col-md-6">
-          <label for="name" class="form-label">Branch Name</label>
-          <input
-            type="text"
-            id="name"
-            class="form-control"
-            formControlName="name"
-            placeholder="Enter Branch Name"
-          />
+          <mat-form-field class="flex-1 fs-16" appearance="outline">
+            <mat-label>Branch Name</mat-label>
+            <input matInput type="text" formControlName="name" placeholder="Branch Name" />
+          </mat-form-field>
         </div>
 
         <!-- Short Name -->
         <div class="col-md-6">
-          <label for="code" class="form-label">Short Name</label>
-          <input
-            type="text"
-            id="code"
-            class="form-control"
-            formControlName="code"
-            placeholder="Enter Short Name"
-          />
+          <mat-form-field class="flex-1 fs-16" appearance="outline">
+            <mat-label>Short Name</mat-label>
+            <input matInput type="text" formControlName="code" placeholder="Short Name" />
+          </mat-form-field>
         </div>
 
         <!-- Address -->
         <div class="col-md-12">
-          <label for="address" class="form-label">Address</label>
-          <textarea
-            id="address"
-            class="form-control"
-            formControlName="address"
-            placeholder="Enter Address"
-            rows="3"
-          ></textarea>
+          <mat-form-field class="flex-1 fs-16" appearance="outline">
+            <mat-label>Address</mat-label>
+            <textarea matInput type="text" formControlName="address" placeholder="Address" ></textarea>
+          </mat-form-field>
         </div>
 
         <!-- TRN Number -->
         <div class="col-md-6">
-          <label for="prnNum" class="form-label">TRN Number</label>
-          <input
-            type="text"
-            id="prnNum"
-            class="form-control"
-            formControlName="prnNum"
-            placeholder="Enter TRN Number"
-          />
+          <mat-form-field class="flex-1 fs-16" appearance="outline">
+            <mat-label>TRN Number</mat-label>
+            <input matInput type="text" formControlName="prnNum" placeholder="TRN Numbers" />
+          </mat-form-field>
         </div>
 
         <!-- Active Toggle -->

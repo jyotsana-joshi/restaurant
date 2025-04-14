@@ -3,6 +3,7 @@ import { FormGroup, FormBuilder, Validators, UntypedFormControl, FormControl } f
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { POSConfigurationService } from '../../pos-configuration.service';
 import { ToastrService } from 'ngx-toastr';
+import { distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-add-user-dialog',
@@ -39,20 +40,35 @@ export class AddUserDialogComponent {
   ngOnInit(): void {
     this.getDesignations();
     this.getBranches();
-    this.designationControl.valueChanges.subscribe((val: any) => {
+    this.designationControl.valueChanges.pipe(distinctUntilChanged()).subscribe((val: any) => {
+      console.log('val: ', val);
       if (val == 1 || val == 2) {
-        this.addUserForm.controls['branchId'].disable();
-        this.addUserForm.controls['password'].enable();
+        this.addUserForm.controls['branchId'].disable({ emitEvent: false });
+        this.addUserForm.controls['branchId'].updateValueAndValidity(); // Update validity
+        this.addUserForm.controls['password'].enable({ emitEvent: false });
+        this.addUserForm.controls['password'].updateValueAndValidity(); // Update validity
       } else if (val === 3) {
-        this.addUserForm.controls['password'].disable();
-        this.addUserForm.controls['branchId'].disable();
+        this.addUserForm.controls['password'].disable({ emitEvent: false });
+        this.addUserForm.controls['password'].updateValueAndValidity(); // Update validity
+        this.addUserForm.controls['branchId'].disable({ emitEvent: false });
+        this.addUserForm.controls['branchId'].updateValueAndValidity(); // Update validity
+      } else {
+        this.addUserForm.controls['branchId'].enable({ emitEvent: false });
+        this.addUserForm.controls['branchId'].updateValueAndValidity(); // Update validity
+        this.addUserForm.controls['password'].enable({ emitEvent: false });
+        this.addUserForm.controls['password'].updateValueAndValidity(); // Update validity
       }
     });
-    this.branchControl.valueChanges.subscribe((val: any) => {
+  
+    // Subscribe to branchControl value changes
+    this.branchControl.valueChanges.pipe(distinctUntilChanged()).subscribe((val: any) => {
+      console.log('val: ', val);
       if (val) {
-        this.addUserForm.controls['designationId'].disable();
+        this.addUserForm.controls['designationId'].disable({ emitEvent: false });
+        this.addUserForm.controls['designationId'].updateValueAndValidity(); // Update validity
       } else {
-        this.addUserForm.controls['designationId'].enable();
+        this.addUserForm.controls['designationId'].enable({ emitEvent: false });
+        this.addUserForm.controls['designationId'].updateValueAndValidity(); // Update validity
       }
     });
   }
@@ -85,6 +101,7 @@ export class AddUserDialogComponent {
       password: [{ value: '', disable: false }],
       designationId: [''],
       branchId: [''],
+      isActive: [true],
     });
 
     this.designationControl = this.addUserForm.controls['designationId'];
@@ -99,6 +116,7 @@ export class AddUserDialogComponent {
       password: null,
       designationId: this.userDetails?.designation?.id || null,
       branchId: this.userDetails?.branch?.id || null,
+      isActive: this.userDetails?.isActive || null,
     });
     // Disable controls based on the conditions
     if (this.userDetails?.designation?.id) {

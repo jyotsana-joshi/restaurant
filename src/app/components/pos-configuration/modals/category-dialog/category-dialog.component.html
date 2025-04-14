@@ -1,37 +1,33 @@
-<form [formGroup]="addcategoryForm" >
+<!--  -->
+
+
+<form [formGroup]="addcategoryForm" class="p-3">
   <div class="card shadow-sm">
     <div class="card-header bg-primary text-white">
       <h4 class="mb-0">{{buttonText}} Category</h4>
     </div>
     <div class="card-body">
-      <!-- Row with two inputs -->
+      <!-- Main Form Fields -->
       <div class="row g-3">
-        <!-- Category Name -->
+        <!-- Customer Name -->
         <div class="col-md-6">
-          <label for="name" class="form-label">Category Name</label>
-          <input
-            type="text"
-            id="name"
-            class="form-control"
-            formControlName="name"
-            placeholder="Enter Category Name"
-          />
+          <mat-form-field class="flex-1 fs-16" appearance="outline">
+            <mat-label>Category Name</mat-label>
+            <input matInput type="text" formControlName="name" placeholder="Category Name" />
+          </mat-form-field>
         </div>
 
-        <!-- Printer -->
+        <!-- Email -->
         <div class="col-md-6">
-          <label for="printer" class="form-label">Printer</label>
-          <select
-            id="printer"
-            class="form-select"
-            formControlName="printer"
-          >
-            <option *ngFor="let print of printerList" [value]="print.id">
-              {{ print.name }}
-            </option>
-          </select>
+          <mat-form-field class="flex-1 fs-16" appearance="outline">
+            <mat-label>Printer</mat-label>
+            <mat-select formControlName="printer">
+              <mat-option *ngFor="let print of printerList" [value]="print.id">{{ print.name }}</mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
 
+     
         <!-- Active Toggle -->
         <div class="col-md-12">
           <div class="form-check form-switch">

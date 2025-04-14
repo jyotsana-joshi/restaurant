@@ -1,5 +1,8 @@
 .sidenav-container {
-  height: 100%;
+  height: 100vh; // Full viewport height
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; // Prevent outer scrollbars
 }
 
 .sidenav {
@@ -9,6 +12,65 @@
 .sidenav .mat-toolbar {
   background: inherit;
 }
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1000; // Ensure it stays on top
+  background: white; // Maintain background to avoid transparency
+}
+
+mat-sidenav-content {
+  flex: 1; // Allow the content to take up remaining space
+  overflow-y: auto; // Enable vertical scrolling for the main content
+  overflow-x: hidden; // Prevent horizontal scrolling
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper {
+  flex: 1; // Ensure the content wrapper takes up available space
+  overflow-y: auto; // Enable scrolling for the content
+  padding: 16px; // Add padding for better spacing
+}
+
+.search-section {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sidenav-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidenav {
+  width: 250px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #ddd;
+}
+
+.sidebar-menu {
+  color: #495057;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.sidebar-menu:hover {
+  background-color: #e9ecef;
+  color: #007bff;
+}
+
+.sidebar-menu.active {
+  background-color: #007bff;
+  color: #fff;
+}
+
 .submenu {
   list-style: none;
   margin: 0;
@@ -19,25 +81,13 @@
   padding-left: 24px;
   font-size: 0.9rem;
 }
-.list-group{
-  display: block;
+
+.submenu .sidebar-menu.active {
+  background-color: #0056b3;
+  color: #fff;
 }
 
-.btn{
-  display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-evenly;
+.submenu .sidebar-menu:hover {
+  background-color: #e9ecef;
+  color: #0056b3;
 }
-
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 1000; /* Ensure it stays on top */
-  background: white; /* Maintain background to avoid transparency */
-}
-
-mat-sidenav-content {
-  overflow: auto;
-}
-

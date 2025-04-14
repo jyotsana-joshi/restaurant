@@ -5,92 +5,86 @@
     </div>
     <div class="card-body">
       <!-- Row with two inputs -->
-      <div class="row g-3">
+      <div class="row">
         <!-- First Name -->
         <div class="col-md-6">
-          <label for="firstName" class="form-label">First Name</label>
-          <input
-            type="text"
-            id="firstName"
-            class="form-control"
-            formControlName="firstName"
-            placeholder="Enter First Name"
-          />
+          <mat-form-field class="flex-1 fs-16" appearance="outline">
+            <mat-label>First Name</mat-label>
+            <input matInput type="text" formControlName="firstName" placeholder="First Name" />
+          </mat-form-field>
         </div>
 
         <!-- Last Name -->
         <div class="col-md-6">
-          <label for="lastName" class="form-label">Last Name</label>
-          <input
-            type="text"
-            id="lastName"
-            class="form-control"
-            formControlName="lastName"
-            placeholder="Enter Last Name"
-          />
+          <mat-form-field class="flex-1 fs-16" appearance="outline">
+            <mat-label>Last Name</mat-label>
+            <input matInput type="text" formControlName="lastName" placeholder="Last Name" />
+          </mat-form-field>
         </div>
       </div>
 
       <!-- Row with two inputs -->
-      <div class="row g-3 mt-3">
+      <div class="row mt-3">
         <!-- User Name -->
         <div class="col-md-6">
-          <label for="username" class="form-label">User Name</label>
-          <input
-            type="text"
-            id="username"
-            class="form-control"
-            formControlName="username"
-            placeholder="Enter User Name"
-          />
+          <mat-form-field class="flex-1 fs-16" appearance="outline">
+            <mat-label>User Name</mat-label>
+            <input matInput type="text" formControlName="username" placeholder="User Name" />
+          </mat-form-field>
         </div>
 
         <!-- Password -->
         <div class="col-md-6" *ngIf="!isEdit">
-          <label for="password" class="form-label">Password</label>
-          <input
-            type="password"
-            id="password"
-            class="form-control"
-            formControlName="password"
-            placeholder="Enter Password"
-          />
+          <mat-form-field class="flex-1 fs-16" appearance="outline" *ngIf="!isEdit">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" formControlName="password" placeholder="Password" />
+          </mat-form-field>
         </div>
       </div>
 
       <!-- Row with dropdowns -->
-      <div class="row g-3 mt-3">
+      <div class="row mt-3">
         <!-- Designation -->
         <div class="col-md-6">
-          <label for="designationId" class="form-label">Designation</label>
-          <select
-            id="designationId"
-            class="form-select"
-            formControlName="designationId"
+          <mat-form-field class="flex-1 fs-16" appearance="outline">
+            <mat-label>Designation</mat-label>
+            <mat-select formControlName="designationId">
+              <mat-option *ngFor="let des of designation" [value]="des.id">{{ des.name }}</mat-option>
+            </mat-select>
+            <button
+            *ngIf="addUserForm.controls['designationId'].value"
+            matSuffix
+            mat-icon-button
+            aria-label="Clear selection"
+            (click)="clearSelection('designationId')"
           >
-            <option *ngFor="let des of designation" [value]="des.id">
-              {{ des.name }}
-            </option>
-          </select>
+            <mat-icon>close</mat-icon>
+          </button>
+          </mat-form-field>
         </div>
 
         <!-- Select Outlet -->
         <div class="col-md-6">
-          <label for="branchId" class="form-label">Select Outlet</label>
-          <select
-            id="branchId"
-            class="form-select"
-            formControlName="branchId"
+          <mat-form-field class="flex-1 fs-16" appearance="outline">
+            <mat-label>Select Outlet</mat-label>
+            <mat-select formControlName="branchId">
+              <mat-option *ngFor="let branch of branchList" [value]="branch.id">{{ branch.name }}</mat-option>
+            </mat-select>
+            <button
+            *ngIf="addUserForm.controls['branchId'].value"
+            matSuffix
+            mat-icon-button
+            aria-label="Clear selection"
+            (click)="clearSelection('branchId')"
           >
-            <option *ngFor="let branch of branchList" [value]="branch.id">
-              {{ branch.name }}
-            </option>
-          </select>
+            <mat-icon>close</mat-icon>
+          </button>
+          </mat-form-field>
         </div>
       </div>
 
       <!-- Active Toggle -->
-      <div class="row g-3 mt-3">
+      <div class="row mt-3">
         <div class="col-md-12">
           <div class="form-check form-switch">
             <input

@@ -3,6 +3,7 @@ import { POSConfigurationService } from '../pos-configuration.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { CustomerDialogComponent } from '../modals/customer-dialog/customer-dialog.component';
+import { PageEvent } from '@angular/material/paginator';
 
 
 @Component({
@@ -15,15 +16,29 @@ export class CustomersComponent {
   dataSource:any = [];
   platforms: string[] = []; // Stores unique platform names
   loading = false;
-
+  paginatedDataSource: any[] = [];
+  pageSize = 50;
+  currentPage = 0;
+  totalCount = 0;
+  currentStartIndex = 0;
+  currentEndIndex = 0;
+  pages: number[] = [];
+  visiblePages: number[] = [];
+totalPages: number = 0;
   constructor(private posConfiService: POSConfigurationService, private dialog: MatDialog, private toastrService: ToastrService) { }
 
   ngOnInit(): void {
-    this.getCustomers();
+    this.fetchData();
   }
-  getCustomers() {
+  fetchData(): void {
+    // Simulate fetching data
+    this.getCustomers(this.currentPage, this.pageSize);
+  }
+
+  getCustomers(page: number, pageSize: number): void {
     this.loading = true;
-    this.posConfiService.getCustomers().subscribe(
+    const offset = page * pageSize;
+    this.posConfiService.getCustomers({ offset, limit: pageSize }).subscribe(
       (response: any) => {
         if(response.data.customers.length > 0){
           this.dataSource = response.data.customers.map((item:any) => {
@@ -32,6 +47,8 @@ export class CustomersComponent {
               uniqueId: item.uniqueId.replace(/_/g, '-')
             };
           });
+          this.totalCount = response?.data?.page?.count ;
+          this.updatePagination();
           this.loading = false;
         }else{
           this.loading = false;
@@ -42,6 +59,30 @@ export class CustomersComponent {
       })
   }
 
+  updatePagination(): void {
+    this.currentStartIndex = this.currentPage * this.pageSize;
+    this.currentEndIndex = Math.min(this.currentStartIndex + this.pageSize, this.totalCount);
+  
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(this.totalCount / this.pageSize);
+    this.totalPages = totalPages;
+  
+    // Calculate visible pages
+    const maxVisiblePages = 5; // Number of pages to show around the current page
+    const startPage = Math.max(0, this.currentPage - Math.floor(maxVisiblePages / 2));
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages);
+  
+    this.visiblePages = Array.from({ length: endPage - startPage }, (_, i) => startPage + i);
+  
+    this.paginatedDataSource = this.dataSource;
+  }
+
+  changePage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.fetchData();
+    }
+  }
 
   addCustomer(){
     const dialogRef = this.dialog.open(CustomerDialogComponent, {
@@ -52,7 +93,7 @@ export class CustomersComponent {
 
     dialogRef.afterClosed().subscribe((result:any) => {
       if (result.success) {
-        this.getCustomers()
+        this.fetchData()
       }
     });
   }
@@ -65,7 +106,7 @@ export class CustomersComponent {
 
     dialogRef.afterClosed().subscribe((result:any) => {
       if (result.success) {
-        this.getCustomers()
+        this.fetchData()
       }
     });
   }
@@ -76,6 +117,7 @@ export class CustomersComponent {
       (response:any) =>{
         console.log(response);
         this.dataSource = this.dataSource.filter((item:any) => item.id !== element.id);
+        this.paginatedDataSource = this.dataSource
         this.toastrService.success(response.message, 'Customer');
 
         element.loading = false;

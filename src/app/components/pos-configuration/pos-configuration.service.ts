@@ -106,7 +106,11 @@ export class POSConfigurationService {
   }
 
   getCustomers(params: { offset: number; limit: number }, search?:any) {
-    return this.httpClient.get(`${this.ApiUrl}customer-management?offset=${params.offset}&limit=${params.limit}&orderDir=ASC&orderBy=id&search=${search}`);
+    let url = `${this.ApiUrl}customer-management?offset=${params.offset}&limit=${params.limit}&orderDir=ASC&orderBy=id`;
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
+    }
+    return this.httpClient.get(url);
   }
 
   addCustomer(payload: any) {
@@ -133,4 +137,9 @@ export class POSConfigurationService {
   getBillByIdPdf(billId: any) {
     return this.httpClient.get(`${this.ApiUrl}billing/${billId}/pdf`, { responseType: 'blob' });
   }
+
+  getAllBills(date: any, isPending: boolean) {
+    return this.httpClient.get(`${this.ApiUrl}billing?date=${date}&isPendingPayment=${isPending}`);
+  }
+  
 }

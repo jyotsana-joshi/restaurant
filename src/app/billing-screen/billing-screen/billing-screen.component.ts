@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 // Removed incorrect import as 'bootstrap' module does not export 'bootstrap'
-import { FormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import * as bootstrap from 'bootstrap';
 import { debounceTime, distinctUntilChanged, Subscription, switchMap } from 'rxjs';
 import { POSConfigurationService } from 'src/app/components/pos-configuration/pos-configuration.service';
@@ -31,27 +31,35 @@ export class BillingScreenComponent {
   disableScrollDown = false;
   orders: any[] = [];
   selectedRowIndex: number | null = null;
-  newlyAddedRowIndex: number | null = null; 
+  newlyAddedRowIndex: number | null = null;
   selectedPlatform: any = 1;
-  numpadKeys = ['1','2','3','4','5','6','7','8','9','0','.'];
+  numpadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.'];
   inputQty: string = '';
   allDeliveryBoys: any[] = [];
-  customerForm:any
-  paymentForm:any
+  customerForm: any
+  paymentForm: any
   searchSub!: Subscription;
-  todayDate : UntypedFormControl = new UntypedFormControl('');
-  subtotalAmount = 0; 
+  todayDate: UntypedFormControl = new UntypedFormControl('');
+  subtotalAmount = 0;
   isLoading = false;
   selectedOrderType: UntypedFormControl = new UntypedFormControl('Table');
   otherChargesForm: any
   missingDetailsMessage: string = '';
-branchId :any
-userDetails:any
+  branchId: any
+  userDetails: any;
+  selectedSection: string = 'billing';
+  payments: any[] = []; // Array to store payment records
+  blankRowsPayment: number = 5;
+  addCashPaymentForm: any
+  transactionTypeForPayment: any[] = [];
+  selectedPaymentRowIndex: number | null = null; // To track the selected row
+  newlyAddedPaymentRowIndex: number | null = null; // To track the newly added row
+  discountPercent: UntypedFormControl = new UntypedFormControl();
   constructor(private posConfiService: POSConfigurationService, private fb: FormBuilder) {
     const value = localStorage.getItem('userDetails');
     this.posConfiService.getUser(value).subscribe(
-      (response:any) =>{
-        console.log(response,"responsee");
+      (response: any) => {
+        console.log(response, "responsee");
         this.userDetails = response.data.user;
         this.branchId = response.data.user.branch.id;
       }
@@ -81,35 +89,53 @@ userDetails:any
       paid: null,
       balance: null,
     });
-  
+
     this.paymentForm.get('paid')?.valueChanges.subscribe(() => {
       this.updateBalance();
     });
 
     this.searchSub = this.customerForm.get('mobile')?.valueChanges
-    .pipe(
-      debounceTime(300), // wait 300ms after typing stops
-      distinctUntilChanged(),
-      switchMap(value => this.posConfiService.getCustomers({offset:1, limit: 10}, value)) // replace with your actual API call)
-    )
-    .subscribe((data:any) => {
-      console.log('data: ', data);
-      if (data.data.customers.length > 0) {
-        const customer = data.data.customers[0];
-        this.customerForm.patchValue({
-          name: customer.name,
-          address: customer.address,
-          customerId: customer.id,
-        });
-      }else{
-        this.customerForm.patchValue({
-          name: '',
-          address: ''
-        });
-      }
+      .pipe(
+        debounceTime(300), // wait 300ms after typing stops
+        distinctUntilChanged(),
+        switchMap(value => this.posConfiService.getCustomers({ offset: 1, limit: 10 }, value)) // replace with your actual API call)
+      )
+      .subscribe((data: any) => {
+        console.log('data: ', data);
+        if (data.data.customers.length > 0) {
+          const customer = data.data.customers[0];
+          this.customerForm.patchValue({
+            name: customer.name,
+            address: customer.address,
+            customerId: customer.id,
+          });
+        } else {
+          this.customerForm.patchValue({
+            name: '',
+            address: ''
+          });
+        }
+      });
+    this.addCashPaymentForm = this.fb.group({
+      paymentDate: [new Date().toISOString().split('T')[0], Validators.required],
+      vendorName: ['', Validators.required],
+      paymentMode: [{ value: 'Cash', disabled: true }],
+      amount: ['', [Validators.required, Validators.min(0.01)]],
+      remarks: ['']
     });
-  
 
+    this.discountPercent.valueChanges.pipe(debounceTime(300)).subscribe((value: number) => {
+      console.log('Discount value changed:', value);
+      if (value < 0 || value > 100) {
+        console.error('Invalid discount value. It should be between 0 and 100.');
+        return;
+      }
+      // Calculate the discount amount and update the subtotal
+      const discountAmount = (this.subtotalAmount * value) / 100;
+      this.paymentForm.get('bill')?.setValue(this.subtotalAmount - discountAmount);
+      this.paymentForm.get('balance')?.setValue(this.subtotalAmount - discountAmount);
+      this.updateBalance();
+    })
   }
 
   updateBalance() {
@@ -167,6 +193,7 @@ userDetails:any
       (response: any) => {
         if (response.data.tidTypes.length > 0) {
           this.allTransactionTypes = response.data.tidTypes;
+          this.transactionTypeForPayment = this.allTransactionTypes.filter((item: any) => item.name === 'Cash');
         }
       },
       (error) => {
@@ -181,7 +208,7 @@ userDetails:any
         if (response.data.outletMenu.length > 0) {
           this.allCategories = response.data.outletMenu;
           this.isLoading = false;
-          this.getItemByCategoryId(this.allCategories[0]); 
+          this.getItemByCategoryId(this.allCategories[0]);
         }
       },
       (error) => {
@@ -209,7 +236,7 @@ userDetails:any
   }
 
   addItemToOrder(item: any) {
-    const platformPriceObj = item.price.find((p:any) => p.platFormId == this.selectedPlatform);
+    const platformPriceObj = item.price.find((p: any) => p.platFormId == this.selectedPlatform);
     const price = platformPriceObj ? platformPriceObj.price : 0;
     const existingOrder = this.orders.find(order => order.id === item.id);
 
@@ -226,7 +253,7 @@ userDetails:any
       };
       this.orders.push(newOrder);
       this.newlyAddedRowIndex = this.orders.length - 1;
-  
+
       setTimeout(() => (this.newlyAddedRowIndex = null), 1000);
     }
     this.calculateTotalAmount();
@@ -248,7 +275,7 @@ userDetails:any
     }
     this.calculateTotalAmount();
   }
-  
+
   minusItemQty() {
     if (this.selectedRowIndex !== null && this.orders[this.selectedRowIndex]) {
       if (this.orders[this.selectedRowIndex].qty > 1) {
@@ -258,23 +285,23 @@ userDetails:any
     }
     this.calculateTotalAmount();
   }
-  
+
   deleteItem() {
     if (this.selectedRowIndex !== null && this.orders[this.selectedRowIndex]) {
       this.orders.splice(this.selectedRowIndex, 1);
-  
+
       // Handle selection after deletion
       if (this.orders.length === 0) {
         this.selectedRowIndex = null;
       } else if (this.selectedRowIndex >= this.orders.length) {
         this.selectedRowIndex = this.orders.length - 1;
       }
-    this.newlyAddedRowIndex = this.selectedRowIndex;
+      this.newlyAddedRowIndex = this.selectedRowIndex;
 
-    // Clear highlight after short delay
-    setTimeout(() => this.newlyAddedRowIndex = null, 1000);
-  }
-  this.calculateTotalAmount();
+      // Clear highlight after short delay
+      setTimeout(() => this.newlyAddedRowIndex = null, 1000);
+    }
+    this.calculateTotalAmount();
   }
 
   updateOrderTotal(order: any) {
@@ -284,20 +311,20 @@ userDetails:any
     this.subtotalAmount = this.displayedOrders
       .filter(order => order && order.total != null)
       .reduce((sum, order) => sum + order.total, 0);
-      this.paymentForm.get('bill')?.setValue(this.subtotalAmount);
+    this.paymentForm.get('bill')?.setValue(this.subtotalAmount);
 
-  // Update balance also
-  this.updateBalance();
+    // Update balance also
+    this.updateBalance();
   }
 
 
   onNumpadClick(key: string) {
     console.log('key: ', key, this.inputQty);
     if (this.selectedRowIndex === null) return;
-  
+
     // Append the key to input string
     this.inputQty += key;
-  
+
     // Parse the quantity
     const parsedQty = parseFloat(this.inputQty);
     if (!isNaN(parsedQty)) {
@@ -335,10 +362,10 @@ userDetails:any
       return;
     }
     const customerName = this.customerForm.get('name')?.value;
-      const customerMobile = this.customerForm.get('mobile')?.value;
-      const customerId = this.customerForm.get('customerId')?.value;
+    const customerMobile = this.customerForm.get('mobile')?.value;
+    const customerId = this.customerForm.get('customerId')?.value;
     if (this.selectedOrderType.value === 'Take Away') {
-      
+
       let message = 'Missing details: ';
       if (!customerName) {
         message += 'Customer name. ';
@@ -346,14 +373,14 @@ userDetails:any
       if (!customerMobile) {
         message += 'Customer mobile number. ';
       }
-      this.missingDetailsMessage  = message.split('. ').join('.\n');
+      this.missingDetailsMessage = message.split('. ').join('.\n');
       if (!customerName || !customerMobile) {
         const modal = new bootstrap.Modal(document.getElementById('missingDetailsModal')!);
         modal.show();
         return;
       }
     }
-  
+
     if (this.selectedOrderType.value === 'Home Delivery') {
       const deliveryBoy = this.customerForm.get('deliveryBoy')?.value;
       let message = 'Missing details: ';
@@ -366,8 +393,8 @@ userDetails:any
       if (!deliveryBoy) {
         message += 'Delivery boy. ';
       }
-      this.missingDetailsMessage  = message.split('. ').join('.\n');
-  
+      this.missingDetailsMessage = message.split('. ').join('.\n');
+
       if (!customerName || !customerMobile || !deliveryBoy) {
         const modal = new bootstrap.Modal(document.getElementById('missingDetailsModal')!);
         modal.show();
@@ -410,7 +437,7 @@ userDetails:any
       isTakeAway: this.selectedOrderType.value === 'Take Away',
       isHomeDelivery: this.selectedOrderType.value === 'Home Delivery',
       subTotal: this.subtotalAmount,
-      
+
       discount: this.paymentForm.get('discount')?.value || 0,
       deliveryBoyId: this.customerForm.get('deliveryBoy')?.value || null,
       branchId: this.branchId.id, // Replace with actual branch ID if dynamic
@@ -420,9 +447,9 @@ userDetails:any
       paid: this.paymentForm.get('paid')?.value || 0,
       isPendingPayment: this.subtotalAmount === this.paymentForm.get('paid')?.value ? false : true,
     };
-  
+
     console.log('Saving bill with payload:', payload);
-  
+
     // Call the service to save the bill
     this.posConfiService.saveBill(payload).subscribe(
       (response: any) => {
@@ -456,6 +483,41 @@ userDetails:any
     );
   }
 
+  savePayment() {
+    if (this.addCashPaymentForm.valid) {
+      const paymentData = this.addCashPaymentForm.getRawValue();
+      paymentData.paymentDate = new Date(paymentData.paymentDate).toISOString();
+      console.log('paymentData: ', paymentData);
+
+      // Comment out the API call
+      // this.http.post('/api/payments', paymentData).subscribe(
+      //   (response: any) => {
+      //     console.log('Payment saved successfully:', response);
+      //   },
+      //   (error: any) => {
+      //     console.error('Error saving payment:', error);
+      //     alert('Failed to save payment. Please try again.');
+      //   }
+      // );
+
+      // Add the payment to the table directly
+      this.payments.push(paymentData);
+      this.newlyAddedPaymentRowIndex = this.payments.length - 1;
+      setTimeout(() => (this.newlyAddedPaymentRowIndex = null), 1000);
+
+      // Reset the form
+      this.addCashPaymentForm.get('amount')?.setValue('');
+      this.addCashPaymentForm.get('vendorName')?.setValue('');
+      this.addCashPaymentForm.get('remarks')?.setValue('');
+    } else {
+      alert('Please fill in all required fields.');
+    }
+  }
+
+  onPaymentRowSelect(index: number) {
+    this.selectedPaymentRowIndex = index; // Highlight the selected row
+  }
+
   newBill() {
     this.orders = [];
     this.selectedRowIndex = null;
@@ -479,14 +541,15 @@ userDetails:any
           this.allDeliveryBoys = response.data;
         }
       },
-      (error:any) => {
+      (error: any) => {
         console.error('Error fetching delivery', error);
-        })
-}
+      })
+  }
+
 
   saveOtherCharges() {
     const otherChargesAmount = this.otherChargesForm.get('amount')?.value;
-  
+
     if (otherChargesAmount > 0) {
       const otherChargesItem = {
         id: 'other-charges', // Unique ID for other charges
@@ -495,7 +558,7 @@ userDetails:any
         qty: 1,
         total: otherChargesAmount
       };
-  
+
       // Add the other charges to the orders table
       this.orders.push(otherChargesItem);
       this.calculateTotalAmount(); // Recalculate the total amount

@@ -55,13 +55,15 @@ export class BillingScreenComponent {
   selectedPaymentRowIndex: number | null = null; // To track the selected row
   newlyAddedPaymentRowIndex: number | null = null; // To track the newly added row
   discountPercent: UntypedFormControl = new UntypedFormControl();
+  allBillsIds: any[] = [];
+  selectedBillId = ''
   constructor(private posConfiService: POSConfigurationService, private fb: FormBuilder) {
     const value = localStorage.getItem('userDetails');
     this.posConfiService.getUser(value).subscribe(
       (response: any) => {
         console.log(response, "responsee");
         this.userDetails = response.data.user;
-        this.branchId = this.userDetails .branch.id;
+        this.branchId = this.userDetails.branch.id;
       }
     )
     this.getCategories();
@@ -84,6 +86,8 @@ export class BillingScreenComponent {
       deliveryBoy: ['']
     });
     this.getDeliveryBoys();
+    this.getAllBills()
+
     this.paymentForm = this.fb.group({
       bill: null,
       paid: null,
@@ -94,13 +98,22 @@ export class BillingScreenComponent {
       this.updateBalance();
     });
 
+    this.todayDate.valueChanges.subscribe((date: Date) => {
+      this.getAllBills();
+    });
+
     this.searchSub = this.customerForm.get('mobile')?.valueChanges
       .pipe(
         debounceTime(300), // wait 300ms after typing stops
         distinctUntilChanged(),
-        switchMap(value => this.posConfiService.getCustomers({ offset: 1, limit: 10 }, value)) // replace with your actual API call)
-      )
-      .subscribe((data: any) => {
+        switchMap(value => {
+          if (!value || value === '') {
+            this.customerForm.reset()
+            return [];
+          }
+          return this.posConfiService.getCustomers({ offset: 1, limit: 10 }, value);
+        })
+      ).subscribe((data: any) => {
         console.log('data: ', data);
         if (data.data.customers.length > 0) {
           const customer = data.data.customers[0];
@@ -117,7 +130,7 @@ export class BillingScreenComponent {
         }
       });
     this.addCashPaymentForm = this.fb.group({
-      paymentDate: [new Date().toISOString().split('T')[0], Validators.required],
+      paymentDate: [this.todayDate.value, Validators.required],
       vendorName: ['', Validators.required],
       paymentMode: [{ value: 'Cash', disabled: true }],
       amount: ['', [Validators.required, Validators.min(0.01)]],
@@ -473,6 +486,7 @@ export class BillingScreenComponent {
           }
         );
         console.log('Bill saved successfully:', response);
+        this.getAllBills();
         alert('Bill saved successfully!');
         this.newBill(); // Reset the form for a new bill
       },
@@ -563,5 +577,58 @@ export class BillingScreenComponent {
       this.orders.push(otherChargesItem);
       this.calculateTotalAmount(); // Recalculate the total amount
     }
+  }
+  
+  getAllBills() {
+    console.log(this.formatDate(new Date()), "this.formatDate(new Date())")
+    this.posConfiService.getAllBills(this.todayDate.value).subscribe(
+      (response: any) => {
+        console.log('response: ', response);
+        if (response.data.length > 0) {
+          this.allBillsIds = response.data
+            .map((bill: any) => bill.billingId)
+            .sort((a: number, b: number) => a - b);
+        }
+      },
+      (error: any) => {
+        console.error('Error fetching delivery', error);
+      })
+  }
+  showBill(event: any) {
+    console.log('event: ', event.target.value);
+    this.selectedBillId = event.target.value;
+    this.posConfiService.getBillById(this.selectedBillId).subscribe(
+      (response: any) => {
+        this.orders = response.billingCalc.items.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          rate: item.price,
+          qty: item.quantity,
+          total: item.price * item.quantity
+        }));
+
+        // Update other fields on the billing screen
+        this.subtotalAmount = parseFloat(response.subTotal);
+        this.paymentForm.patchValue({
+          bill: this.subtotalAmount,
+          paid: this.subtotalAmount, // Assuming full payment for now
+          balance: 0 // Assuming no balance for now
+        });
+
+        // this.customerForm.patchValue({
+        //   name: response.branch.name || '',
+        //   address: response.branch.address || '',
+        //   remark: '' // Assuming no remarks in the response
+        // });
+
+        this.selectedOrderType.setValue(
+          response.isTakeAway
+            ? 'Take Away'
+            : response.isHomeDelivery
+              ? 'Home Delivery'
+              : 'Table'
+        );
+
+      })
   }
 }

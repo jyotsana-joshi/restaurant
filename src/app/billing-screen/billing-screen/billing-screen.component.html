@@ -70,10 +70,8 @@
             </div> -->
             <div class="d-inline-flex header-input col-xs-12 align-items-stretch justify-content-start ">
               <label for="" class="text-white bg-blue text-end">Bill NO:</label>
-              <select class="w-100-p fs-4 fw-bold">
-                <option>1</option>
-                <option>2</option>
-                <option>3</option>
+              <select class="w-100-p " (change)="showBill($event)">
+                <option *ngFor="let billingId of allBillsIds" [value]="billingId" >{{billingId}}</option>
               </select>
             </div>
             <div class="d-inline-flex header-input col-xs-12 align-items-stretch justify-content-start">

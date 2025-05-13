@@ -138,8 +138,16 @@ export class POSConfigurationService {
     return this.httpClient.get(`${this.ApiUrl}billing/${billId}/pdf`, { responseType: 'blob' });
   }
 
-  getAllBills(date: any, isPending: boolean) {
-    return this.httpClient.get(`${this.ApiUrl}billing?date=${date}&isPendingPayment=${isPending}`);
+  getAllBills(date: any, isPending?: boolean) {
+    let url = `${this.ApiUrl}billing?date=${date}`;
+    if (isPending) {
+      url += `&isPendingPayment=${isPending}`;
+    }
+    return this.httpClient.get(url);
+  }
+
+  getBillById(billId: any) {
+    return this.httpClient.get(`${this.ApiUrl}billing/${billId}`);
   }
   
 }

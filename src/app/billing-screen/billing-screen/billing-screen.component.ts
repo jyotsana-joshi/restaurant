@@ -32,7 +32,7 @@ export class BillingScreenComponent {
   orders: any[] = [];
   selectedRowIndex: number | null = null;
   newlyAddedRowIndex: number | null = null;
-  selectedPlatform: any = 1;
+  selectedPlatform = 1;
   numpadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.'];
   inputQty: string = '';
   allDeliveryBoys: any[] = [];
@@ -262,7 +262,8 @@ export class BillingScreenComponent {
         name: item.name,
         rate: price,
         qty: 1,
-        total: price
+        total: price,
+        price: item.price,
       };
       this.orders.push(newOrder);
       this.newlyAddedRowIndex = this.orders.length - 1;
@@ -358,7 +359,7 @@ export class BillingScreenComponent {
     console.log('Selected transaction type:', event.target.value);
     this.selectedPlatform = event.target.value;
     this.orders.forEach(order => {
-      const platformPriceObj = order.price.find((p: any) => p.platForm === this.selectedPlatform);
+      const platformPriceObj = order.price.find((p: any) => p.id === this.selectedPlatform);
       const price = platformPriceObj ? platformPriceObj.price : 0;
       order.rate = price;
       this.updateOrderTotal(order);

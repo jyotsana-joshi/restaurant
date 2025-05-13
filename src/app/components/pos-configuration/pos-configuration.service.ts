@@ -76,6 +76,10 @@ export class POSConfigurationService {
 
   }
 
+  getItemByCategoryId(categoryId: any) {
+    return this.httpClient.get(`${this.ApiUrl}sub-menu/category/${categoryId}`);
+  }
+
   getTransactionTypes() {
     return this.httpClient.get(`${this.ApiUrl}tran-type?offset=0&limit=500&orderDir=ASC&orderBy=id`);
   }
@@ -101,8 +105,12 @@ export class POSConfigurationService {
     return this.httpClient.get(`${this.ApiUrl}tran-type?offset=0&limit=500&orderDir=DESC&orderBy=id`);
   }
 
-  getCustomers(params: { offset: number; limit: number }) {
-    return this.httpClient.get(`${this.ApiUrl}customer-management?offset=${params.offset}&limit=${params.limit}&orderDir=ASC&orderBy=id`);
+  getCustomers(params: { offset: number; limit: number }, search?:any) {
+    let url = `${this.ApiUrl}customer-management?offset=${params.offset}&limit=${params.limit}&orderDir=ASC&orderBy=id`;
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
+    }
+    return this.httpClient.get(url);
   }
 
   addCustomer(payload: any) {
@@ -117,4 +125,21 @@ export class POSConfigurationService {
     return this.httpClient.delete(`${this.ApiUrl}customer-management`, { body: customerIds });
 
   }
+
+  getDeliveryBoys(){
+      return this.httpClient.get(`${this.ApiUrl}list/delivery-boys`);
+  }
+
+  saveBill(payload: any) {
+    return this.httpClient.post(`${this.ApiUrl}billing`, payload);
+  }
+
+  getBillByIdPdf(billId: any) {
+    return this.httpClient.get(`${this.ApiUrl}billing/${billId}/pdf`, { responseType: 'blob' });
+  }
+
+  getAllBills(date: any, isPending: boolean) {
+    return this.httpClient.get(`${this.ApiUrl}billing?date=${date}&isPendingPayment=${isPending}`);
+  }
+  
 }

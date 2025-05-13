@@ -61,7 +61,7 @@ export class BillingScreenComponent {
       (response: any) => {
         console.log(response, "responsee");
         this.userDetails = response.data.user;
-        this.branchId = response.data.user.branch.id;
+        this.branchId = this.userDetails .branch.id;
       }
     )
     this.getCategories();
@@ -440,7 +440,7 @@ export class BillingScreenComponent {
 
       discount: this.paymentForm.get('discount')?.value || 0,
       deliveryBoyId: this.customerForm.get('deliveryBoy')?.value || null,
-      branchId: this.branchId.id, // Replace with actual branch ID if dynamic
+      branchId: this.branchId, // Replace with actual branch ID if dynamic
       paymentMethodId: this.selectedPlatform, // Assuming selectedPlatform holds the payment method ID
       table: this.selectedOrderType.value === 'Table',
       customerId: this.customerForm.get('customerId')?.value || customerId,

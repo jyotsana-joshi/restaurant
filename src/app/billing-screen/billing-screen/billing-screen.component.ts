@@ -99,6 +99,7 @@ export class BillingScreenComponent {
     });
 
     this.todayDate.valueChanges.subscribe((date: Date) => {
+      this.allBillsIds = [];
       this.getAllBills();
     });
 
@@ -457,9 +458,10 @@ export class BillingScreenComponent {
       branchId: this.branchId, // Replace with actual branch ID if dynamic
       paymentMethodId: this.selectedPlatform, // Assuming selectedPlatform holds the payment method ID
       table: this.selectedOrderType.value === 'Table',
-      customerId: this.customerForm.get('customerId')?.value || customerId,
+      customerId: customerId,
       paid: this.paymentForm.get('paid')?.value || 0,
       isPendingPayment: this.subtotalAmount === this.paymentForm.get('paid')?.value ? false : true,
+      remarks: this.customerForm.get('remark')?.value || '',
     };
 
     console.log('Saving bill with payload:', payload);
@@ -587,9 +589,12 @@ export class BillingScreenComponent {
         console.log('response: ', response);
         if (response.data.length > 0) {
           this.allBillsIds = response.data
-            .map((bill: any) => bill.billingId)
-            .sort((a: number, b: number) => a - b);
+          this.allBillsIds = response.data
+          .map((bill: any) => ({ id: bill.id, billingId: bill.billingId }))
+          .sort((a: any, b: any) => a.billingId - b.billingId); // Sort by billingId
+      
         }
+        console.log(this.allBillsIds,this.allBillsIds)
       },
       (error: any) => {
         console.error('Error fetching delivery', error);

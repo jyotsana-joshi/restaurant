@@ -149,5 +149,10 @@ export class POSConfigurationService {
   getBillById(billId: any) {
     return this.httpClient.get(`${this.ApiUrl}billing/${billId}`);
   }
+
+  updateBill(billingId: any, payload: any){
+    return this.httpClient.put(`${this.ApiUrl}billing/${billingId}`, payload);
+  }
   
+ 
 }

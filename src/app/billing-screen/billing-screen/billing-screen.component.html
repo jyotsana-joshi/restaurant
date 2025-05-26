@@ -71,6 +71,7 @@
             <div class="d-inline-flex header-input col-xs-12 align-items-stretch justify-content-start ">
               <label for="" class="text-white bg-blue text-end">Bill NO:</label>
               <select class="w-100-p " (change)="showBill($event)">
+                <option value="" disabled selected>Select Bill No</option>
                 <option *ngFor="let id of allBillsIds" [value]="id.id" >{{id.billingId}}</option>
               </select>
             </div>
@@ -105,14 +106,14 @@
                 <span class="w-100 fw-semibold">Down</span>
               </div>
             </button>
-            <!-- <button class="w-100 h-auto mt-auto">
+            <button class="w-100 h-auto mt-auto">
               <div class="d-flex flex-column w-100 text-center">
                 <span class=" w-100">
                   <img src="assets/icon/file-update.png">
                 </span>
                 <span class="w-100 fw-semibold">Update</span>
               </div>
-            </button> -->
+            </button>
           </div>
         </div>
         <div class="w-100 d-flex flex-row flex-wrap align-items-stretch justify-content-between">
@@ -315,28 +316,28 @@
       <div class="form-container" [formGroup]="addCashPaymentForm">
         <div class="form-row">
           <div class="form-label">Payment Dt. :</div>
-          <div class="form-input">
-            <input type="date" formControlName="paymentDate">
+          <div class="form-input w-100">
+            <input class="w-100" type="date" formControlName="paymentDate">
           </div>
           <div class="form-label">Payment To :</div>
-          <div class="form-input">
-            <input type="text" formControlName="vendorName">
+          <div class="form-input w-100">
+            <input class="w-100" type="text" formControlName="vendorName">
           </div>
         </div>
         <div class="form-row">
           <div class="form-label">Payment Mode :</div>
-          <div class="form-input">
-            <input type="text" value="Cash" formControlName="paymentMode">
+          <div class="form-input w-100">
+            <input class="w-100" type="text" value="Cash" formControlName="paymentMode">
           </div>
           <div class="form-label">Payment Amt :</div>
-          <div class="form-input">
-            <input type="text" value="0.000" formControlName="amount">
+          <div class="form-input w-100">
+            <input class="w-100" type="text" value="0.000" formControlName="amount">
           </div>
         </div>
         <div class="form-row">
           <div class="form-label">Remarks :</div>
-          <div class="form-input" style="flex: 3">
-            <textarea formControlName="remarks"></textarea>
+          <div class="form-input w-100" style="flex: 3">
+            <textarea class="w-100" formControlName="remarks"></textarea>
           </div>
         </div>
       </div>
@@ -406,7 +407,243 @@
       </div>
     </div>
   </div>
-  
+  <div *ngIf="selectedSection === 'kot'">
+    <div class="bill-container">
+      <div class="bill-header">
+          <div class="bill-header-item">
+              <label class="input-label">Bill Dt. & No.</label>
+              <input type="date" [formControl]="billDateToday">
+          </div>
+          <div class="bill-header-item">
+              <label class="input-label">New Bill No.</label>
+              <input type="text" value="428" readonly>
+          </div>
+          <div class="bill-no-dropdown">
+              <label class="input-label" >Bill No.</label>
+              <select class="dropdown" (change)="showPendingBills($event)">
+                <option value="" disabled selected>Select Bill No</option>
+                <option *ngFor="let id of pendingBillsIds" [value]="id.id" >{{id.billingId}}</option>
+              </select>
+          </div>
+      </div>
+      <table class="bill-table">
+          <thead>
+              <tr>
+                <th style="width: 30px;">#</th>
+                <th>Item Name</th>
+                <th style="width: 80px;">Rate</th>
+                <th style="width: 80px;">Quantity</th>
+                <th style="width: 80px;">Total</th>
+                  <!-- <th style="width: 30px;">C</th>
+                  <th>Name</th>
+                  <th style="width: 80px;">Rate (PO)</th>
+                  <th style="width: 80px;">Quantity</th>
+                  <th style="width: 50px;">V/I</th>
+                  <th style="width: 80px;">Total (PO)</th> -->
+              </tr>
+          </thead>
+          <tbody>
+              <!-- <tr>
+                  <td style="text-align: center;"><input type="checkbox" checked></td>
+                  <td>Ice Cola in Bowl</td>
+                  <td style="text-align: right;">8.000</td>
+                  <td style="text-align: right;">3.000</td>
+                  <td>Unit</td>
+                  <td style="text-align: right;">24.000</td>
+              </tr>
+              <tr>
+                  <td style="text-align: center;"><input type="checkbox" checked></td>
+                  <td>Ice Cola in Bowl</td>
+                  <td style="text-align: right;">8.000</td>
+                  <td style="text-align: right;">3.000</td>
+                  <td>Unit</td>
+                  <td style="text-align: right;">24.000</td>
+              </tr>
+              <tr>
+                  <td style="text-align: center;"><input type="checkbox" checked></td>
+                  <td>Ice Cola in Bowl</td>
+                  <td style="text-align: right;">8.000</td>
+                  <td style="text-align: right;">3.000</td>
+                  <td>Unit</td>
+                  <td style="text-align: right;">24.000</td>
+              </tr>
+              <tr>
+                  <td style="text-align: center;"><input type="checkbox" checked></td>
+                  <td>Ice Cola in Bowl</td>
+                  <td style="text-align: right;">8.000</td>
+                  <td style="text-align: right;">3.000</td>
+                  <td>Unit</td>
+                  <td style="text-align: right;">24.000</td>
+              </tr> -->
+              <tr *ngFor="let item of selectedPendingBillItems; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.rate | number: '1.2-2' }}</td>
+                <td>{{ item.qty }}</td>
+                <td>{{ item.total | number: '1.2-2' }}</td>
+              </tr>
+              <ng-container *ngIf="selectedPendingBillItems.length < 5">
+              <tr *ngFor="let blankRow of [].constructor(5 - selectedPendingBillItems.length); let i = index" >
+                <td>{{ selectedPendingBillItems.length + i + 1 }}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </ng-container>
+
+          </tbody>
+      </table>
+
+      <div class="payment-section" [formGroup]="kotPaymentForm">
+          <div class="left-controls">
+              <div class="control-group">
+                  <div class="btn-group">
+                      <button class="btn">
+                        <input type="checkbox" formControlName="isTakeAway">
+                          Take Away
+                      </button>
+                      <button class="btn delete">
+                          <img src="assets/icon/remove.png" alt="Delete">
+                          Delete
+                      </button>
+                  </div>
+                  <div class="btn-group">
+                      <button class="btn" (click)="printBill(selectedPendingBill)">
+                          <img src="assets/icon/sav_print.png" alt="Save & Print">
+                          Save & Print
+                      </button>
+                      <button class="btn">
+                          <img src="assets/icon/save-only.png" alt="Save Only">
+                          Save Only
+                      </button>
+                  </div>
+                  <div class="btn-group">
+                      <button class="btn">
+                          <img src="assets/icon/refresh.png" alt="New Bill">
+                          New Bill
+                      </button>
+                      <button class="btn">
+                          <img src="assets/icon/sav_print.png" alt="Print Only">
+                          Print Only
+                      </button>
+                  </div>
+              </div>
+              <div class="buttons_wrap">
+                <button class="primary-btn disabled section-label">Receive HD Bill Amt</button>
+                <button class="primary-btn btn" (click)="receivePayment()">Receive Payment</button>
+              </div>
+          </div>
+          <div class="right-section">
+              <div class="input-row">
+                  <div class="input-group">                      
+                      <span class="input-label d-flex align-items-center gap-2 bg-white text-black">
+                      <input class="h-auto" type="checkbox"formControlName="isHomeDelivery"> HD:</span>
+                      <input type="text" class="input-field">
+                  </div>
+                  <div class="input-group">
+                      <span class="input-label">Name:</span>
+                      <input type="text" class="input-field">
+                  </div>
+              </div>
+              
+              <div class="input-row">
+                  <div class="input-group">
+                      <span class="input-label">Discount:</span>
+                      <select class="dropdown">
+                          <option>%</option>
+                      </select>
+                    </div>
+                    <div class="input-group">
+                      <input type="text" formControlName="discount" class="input-field" value="0.000" style="text-align: right;">
+                      <!-- <input type="text" class="input-field" value="0.000" style="text-align: right;"> -->
+                  </div>
+              </div>
+          
+              <div class="payment-options">
+                <label class="payment-option cash">
+                  <input type="radio" formControlName="paymentMode" value="Cash">
+                  <span>CASH</span>
+                </label>
+                <label class="payment-option card-cash">
+                  <input type="radio" formControlName="paymentMode" value="Credit Card & Cash">
+                  <span>CARD & CASH</span>
+                </label>
+                <label class="payment-option credit-card">
+                  <input type="radio" formControlName="paymentMode" value="Credit Card">
+                  <span>CREDIT CARD</span>
+                </label>
+                <label class="payment-option credit">
+                  <input type="radio" formControlName="paymentMode" value="Credit">
+                  <span>CREDIT</span>
+                </label>
+              </div>
+          
+              <div class="amount-section">
+                  <div class="amount-row">
+                      <span class="input-label">Bill Amt:</span>
+                      <input type="text" class="input-field" formControlName="subTotal" readonly>
+                  </div>
+                  <div class="amount-row">
+                      <span class="input-label">Cash:</span>
+                      <input type="text" class="input-field" formControlName="cash">
+                  </div>
+                  <div class="amount-row">
+                      <span class="input-label">Card:</span>
+                      <select class="dropdown"></select>
+                  </div>
+                  <div class="amount-row">
+                      <span class="input-label">Card Amt:</span>
+                      <input type="text" class="input-field" formControlName="card">
+                  </div>
+                  <div class="amount-row">
+                      <span class="input-label">Paid (RO):</span>
+                      <input type="text" class="input-field" formControlName="paid">
+                  </div>
+                  <div class="amount-row">
+                      <span class="input-label">Bal. (A/C):</span>
+                      <input type="text" class="input-field" formControlName="bal">
+                  </div>
+                  <div class="amount-row">
+                      <span class="input-label">Customer:</span>
+                      <!-- <select class="dropdown"></select> -->
+                      <input type="text" class="input-field" formControlName="customerName">
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <div class="pending-bills">
+          <table class="pending-table">
+              <thead>
+                  <tr>
+                      <th>#</th>
+                      <th>Pending Bill No</th>
+                      <th>Pending Bill Amount</th>
+                      <th>Table No/ TW</th>
+                  </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let bill of pendingBills; let i = index" [ngClass]="{ 'selected-row': i === selectedPendingBillIndex }" (click)="onPendingBillSelect(i, bill)">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ bill.billingId }}</td>
+                  <td>{{ bill.subTotal | number: '1.2-2' }}</td>
+                  <td>N/A</td>
+                </tr>
+                <!-- Render blank rows if fewer than 5 pending bills -->
+                <ng-container *ngIf="pendingBills.length < 5">
+                <tr  *ngFor="let blankRow of [].constructor(5 - pendingBills.length); let i = index" >
+                    <td>{{ pendingBills.length + i + 1 }}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                </ng-container>
+              </tbody>
+          </table>
+      </div>
+  </div>
+  </div>
 </div>
 
 <div *ngIf="isLoading" class="full-screen-loader">

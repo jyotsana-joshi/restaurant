@@ -38,8 +38,10 @@ export class BillingScreenComponent {
   allDeliveryBoys: any[] = [];
   customerForm: any
   paymentForm: any
+  kotPaymentForm: any
   searchSub!: Subscription;
   todayDate: UntypedFormControl = new UntypedFormControl('');
+  billDateToday: UntypedFormControl = new UntypedFormControl('');
   subtotalAmount = 0;
   isLoading = false;
   selectedOrderType: UntypedFormControl = new UntypedFormControl('Table');
@@ -47,7 +49,7 @@ export class BillingScreenComponent {
   missingDetailsMessage: string = '';
   branchId: any
   userDetails: any;
-  selectedSection: string = 'billing';
+  selectedSection: string = 'kot';
   payments: any[] = []; // Array to store payment records
   blankRowsPayment: number = 5;
   addCashPaymentForm: any
@@ -56,7 +58,12 @@ export class BillingScreenComponent {
   newlyAddedPaymentRowIndex: number | null = null; // To track the newly added row
   discountPercent: UntypedFormControl = new UntypedFormControl();
   allBillsIds: any[] = [];
-  selectedBillId = ''
+  selectedBillId = '';
+  pendingBills: any[] = []; // Store all pending bills
+  pendingBillsIds: any[] = []; // Store all pending bills
+  selectedPendingBill: any = null; // Store the selected pending bill
+  selectedPendingBillItems: any[] = []; // Store items of the selected pending bill
+  selectedPendingBillIndex: number | null = null; // To track the selected row
   constructor(private posConfiService: POSConfigurationService, private fb: FormBuilder) {
     const value = localStorage.getItem('userDetails');
     this.posConfiService.getUser(value).subscribe(
@@ -77,13 +84,15 @@ export class BillingScreenComponent {
     const formattedDate = this.formatDate(now); // DD/MM/YYYY
     console.log('formattedDate: ', formattedDate);
     this.todayDate.setValue(formattedDate);
+    this.billDateToday.setValue(formattedDate);
+    this.getAllPendingBills();
     this.customerForm = this.fb.group({
-      customerId: [''],
-      mobile: [''],
-      name: [''],
-      address: [''],
-      remark: [''],
-      deliveryBoy: ['']
+      customerId: [],
+      mobile: [],
+      name: [],
+      address: [],
+      remark: [],
+      deliveryBoy: []
     });
     this.getDeliveryBoys();
     this.getAllBills()
@@ -94,13 +103,36 @@ export class BillingScreenComponent {
       balance: null,
     });
 
+    this.kotPaymentForm = this.fb.group({
+      isTakeAway: [false], // Add the missing control with a default value
+      isHomeDelivery: [false], // Add other controls as needed
+      paymentMode: ['Cash'], // Example control for payment mode
+      subTotal: [0],
+      cash: [0],
+      card: [0],
+      paid: [0],
+      bal: [0],
+      customerName: [''],
+      discount: [0]
+    })
+
     this.paymentForm.get('paid')?.valueChanges.subscribe(() => {
       this.updateBalance();
+    });
+
+    this.kotPaymentForm.get('paid')?.valueChanges.subscribe((paidValue: number) => {
+      const subTotal = this.kotPaymentForm.get('subTotal')?.value || 0;
+      const balance = subTotal - paidValue; // Calculate the balance
+      this.kotPaymentForm.patchValue({ bal: balance === 0 ? balance : -balance }, { emitEvent: false }); // Update balance
     });
 
     this.todayDate.valueChanges.subscribe((date: Date) => {
       this.allBillsIds = [];
       this.getAllBills();
+    });
+    this.billDateToday.valueChanges.subscribe((date: Date) => {
+      this.pendingBills = [];
+      this.getAllPendingBills();
     });
 
     this.searchSub = this.customerForm.get('mobile')?.valueChanges
@@ -112,7 +144,7 @@ export class BillingScreenComponent {
             this.customerForm.reset()
             return [];
           }
-          return this.posConfiService.getCustomers({ offset: 1, limit: 10 }, value);
+          return this.posConfiService.getCustomers({ offset: 0, limit: 10 }, value);
         })
       ).subscribe((data: any) => {
         console.log('data: ', data);
@@ -166,7 +198,7 @@ export class BillingScreenComponent {
   }
 
   ngAfterViewInit() {
-    this.checkScrollPosition();
+    // this.checkScrollPosition();
   }
 
   ngOnDestroy() {
@@ -360,7 +392,7 @@ export class BillingScreenComponent {
     console.log('Selected transaction type:', event.target.value);
     this.selectedPlatform = event.target.value;
     this.orders.forEach(order => {
-      const platformPriceObj = order.price.find((p: any) => p.id === this.selectedPlatform);
+      const platformPriceObj = order.price.find((p: any) => p.platFormId == this.selectedPlatform);
       const price = platformPriceObj ? platformPriceObj.price : 0;
       order.rate = price;
       this.updateOrderTotal(order);
@@ -458,8 +490,9 @@ export class BillingScreenComponent {
       branchId: this.branchId, // Replace with actual branch ID if dynamic
       paymentMethodId: this.selectedPlatform, // Assuming selectedPlatform holds the payment method ID
       table: this.selectedOrderType.value === 'Table',
-      customerId: customerId,
-      paid: this.paymentForm.get('paid')?.value || 0,
+      customerId: customerId ?? null,
+      paid: this.paymentForm.get('paid')?.value ?? 0,
+      bal: this.paymentForm.get('bill')?.value ?? null,
       isPendingPayment: this.subtotalAmount === this.paymentForm.get('paid')?.value ? false : true,
       remarks: this.customerForm.get('remark')?.value || '',
     };
@@ -469,25 +502,7 @@ export class BillingScreenComponent {
     // Call the service to save the bill
     this.posConfiService.saveBill(payload).subscribe(
       (response: any) => {
-        this.posConfiService.getBillByIdPdf(response.data.id).subscribe(
-          (pdfResponse: Blob) => {
-            const pdfUrl = URL.createObjectURL(pdfResponse);
-            window.open(pdfUrl, '_blank');
-            // const pdfUrl = URL.createObjectURL(pdfResponse);
-            // const iframe = document.createElement('iframe');
-            // iframe.style.display = 'none';
-            // iframe.src = pdfUrl;
-            // document.body.appendChild(iframe);
-            // iframe.onload = () => {
-            //   iframe.contentWindow?.print(); // Trigger print for the billing printer
-            //   document.body.removeChild(iframe); // Clean up the iframe after printing
-            // };
-          },
-          (error: any) => {
-            console.error('Error fetching PDF:', error);
-            alert('Failed to fetch the bill PDF. Please try again.');
-          }
-        );
+        this.printBill(response?.data?.id);
         console.log('Bill saved successfully:', response);
         this.getAllBills();
         alert('Bill saved successfully!');
@@ -500,6 +515,28 @@ export class BillingScreenComponent {
     );
   }
 
+  printBill(bill:any){
+    const id = bill.id || bill; // Ensure id is defined
+    this.posConfiService.getBillByIdPdf(id).subscribe(
+      (pdfResponse: Blob) => {
+        const pdfUrl = URL.createObjectURL(pdfResponse);
+        window.open(pdfUrl, '_blank');
+        // const pdfUrl = URL.createObjectURL(pdfResponse);
+        // const iframe = document.createElement('iframe');
+        // iframe.style.display = 'none';
+        // iframe.src = pdfUrl;
+        // document.body.appendChild(iframe);
+        // iframe.onload = () => {
+        //   iframe.contentWindow?.print(); // Trigger print for the billing printer
+        //   document.body.removeChild(iframe); // Clean up the iframe after printing
+        // };
+      },
+      (error: any) => {
+        console.error('Error fetching PDF:', error);
+        alert('Failed to fetch the bill PDF. Please try again.');
+      }
+    );
+  }
   savePayment() {
     if (this.addCashPaymentForm.valid) {
       const paymentData = this.addCashPaymentForm.getRawValue();
@@ -544,6 +581,7 @@ export class BillingScreenComponent {
     this.todayDate.setValue(this.formatDate(new Date()));
     this.subtotalAmount = 0;
     this.selectedPlatform = 1;
+
   }
   onItemSelect(item: any) {
     console.log('Selected item:', item);
@@ -581,7 +619,7 @@ export class BillingScreenComponent {
       this.calculateTotalAmount(); // Recalculate the total amount
     }
   }
-  
+
   getAllBills() {
     console.log(this.formatDate(new Date()), "this.formatDate(new Date())")
     this.posConfiService.getAllBills(this.todayDate.value).subscribe(
@@ -590,18 +628,104 @@ export class BillingScreenComponent {
         if (response.data.length > 0) {
           this.allBillsIds = response.data
           this.allBillsIds = response.data
-          .map((bill: any) => ({ id: bill.id, billingId: bill.billingId }))
-          .sort((a: any, b: any) => a.billingId - b.billingId); // Sort by billingId
-      
+            .map((bill: any) => ({ id: bill.id, billingId: bill.billingId }))
+            .sort((a: any, b: any) => a.billingId - b.billingId); // Sort by billingId
+
         }
-        console.log(this.allBillsIds,this.allBillsIds)
+        console.log(this.allBillsIds, this.allBillsIds)
       },
       (error: any) => {
         console.error('Error fetching delivery', error);
       })
   }
+
+  getAllPendingBills() {
+    this.posConfiService.getAllBills(this.billDateToday.value, true).subscribe(
+      (response: any) => {
+        console.log('response: ', response);
+        if (response.data.length > 0) {
+          this.pendingBills = response.data;
+          this.pendingBillsIds = response.data
+            .map((bill: any) => ({ id: bill.id, billingId: bill.billingId }));
+        } else {
+          this.pendingBills = [];
+        }
+      },
+      (error: any) => {
+        console.error('Error fetching delivery', error);
+      })
+  }
+
+  showPendingBillItems(bill: any) {
+    console.log('bill: ', bill);
+    this.selectedPendingBill = bill; // Set the selected bill
+    this.selectedPendingBillItems = bill.billingCalc.items.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      rate: item.price,
+      qty: item.quantity,
+      total: item.price * item.quantity
+    }));
+
+    const balance = -parseFloat(bill.subTotal);
+
+    this.kotPaymentForm.patchValue({
+      isTakeAway: bill.isTakeAway, // Add the missing control with a default value
+      isHomeDelivery: bill.isHomeDelivery, // Add other controls as needed
+      paymentMode: bill.paymentMethod.name, // Example control for payment mode
+      subTotal: parseFloat(bill.subTotal),
+      cash: [],
+      card: [],
+      paid: 0,
+      bal: balance,
+      customerName: [''],
+      discount: bill.discount || 0
+    })
+  }
+  onPendingBillSelect(index: number, bill: any) {
+    this.selectedPendingBillIndex = index; // Highlight the selected row
+    this.showPendingBillItems(bill) // Set the selected bill
+    console.log('Selected Pending Bill:', bill);
+  }
+  receivePayment() {
+    console.log('this.selectedPendingBill: ', this.selectedPendingBill);
+    const paymentModeName = this.kotPaymentForm.get('paymentMode')?.value;
+    // Find the corresponding payment mode ID from allTransactionTypes
+    const paymentMode = this.allTransactionTypes.find(
+      (type: any) => type.name === paymentModeName
+    );
+    console.log('paymentMode: ', paymentMode);
+    if (!this.selectedPendingBill) {
+      alert('Please select a pending bill first.');
+      return;
+    }
+
+    // Prepare the updated bill payload
+    const updatedBill = {
+      id: this.selectedPendingBill.id, // Use the ID of the selected pending bill 
+      isPendingPayment: false, // Mark payment as completed
+      paid: this.kotPaymentForm.get('paid')?.value || 0, // Get the paid amount
+      bal: this.kotPaymentForm.get('bal')?.value || 0, // Get the balance,
+      paymentMethodId: paymentMode ? paymentMode.id : null, // Use the ID of the selected payment mode  
+    };
+
+    // Call the update API
+    this.posConfiService.updateBill(updatedBill.id, updatedBill).subscribe(
+      (response: any) => {
+        alert('Payment received successfully!');
+        this.getAllPendingBills(); // Refresh the pending bills list
+        this.selectedPendingBill = null; // Clear the selected bill
+        this.selectedPendingBillItems = []; // Clear the items
+        this.kotPaymentForm.reset(); // Reset the form
+
+      },
+      (error: any) => {
+        alert('Failed to update payment status. Please try again.');
+      }
+    );
+  }
+
   showBill(event: any) {
-    console.log('event: ', event.target.value);
     this.selectedBillId = event.target.value;
     this.posConfiService.getBillById(this.selectedBillId).subscribe(
       (response: any) => {
@@ -617,16 +741,20 @@ export class BillingScreenComponent {
         this.subtotalAmount = parseFloat(response.subTotal);
         this.paymentForm.patchValue({
           bill: this.subtotalAmount,
-          paid: this.subtotalAmount, // Assuming full payment for now
-          balance: 0 // Assuming no balance for now
+          paid: response?.isPendingPayment ? 0 : this.subtotalAmount, // Assuming full payment for now
+          balance: response?.isPendingPayment ? this.subtotalAmount : 0 // Assuming no balance for now
         });
-
-        // this.customerForm.patchValue({
-        //   name: response.branch.name || '',
-        //   address: response.branch.address || '',
-        //   remark: '' // Assuming no remarks in the response
-        // });
-
+        const customerDetails = response.customer
+        this.customerForm.patchValue({
+          customerId: [customerDetails?.id],
+          mobile: [customerDetails?.phone],
+          name: [customerDetails?.name],
+          address: [customerDetails?.address],
+          remark: [response?.remarks],
+          deliveryBoy: [response?.deliveryBoyId]
+        },
+          { emitEvent: false });
+        this.discountPercent.setValue(parseInt(response?.discount), { emitEvent: false })
         this.selectedOrderType.setValue(
           response.isTakeAway
             ? 'Take Away'
@@ -637,4 +765,31 @@ export class BillingScreenComponent {
 
       })
   }
+  showPendingBills(event: any) {
+    console.log('event: ', event.target.value);
+   const selectedPendingBillId = event.target.value;
+
+    // Find the selected bill in the pending bills list
+    console.log('this.pendingBills: ', this.pendingBills);
+    const selectedBill = this.pendingBills.find((bill: any) => bill.id === parseInt(selectedPendingBillId, 10));
+    console.log('selectedBill: ', selectedBill);
+
+    if (selectedBill) {
+      // Highlight the selected bill in the pending bills section
+      this.selectedPendingBillIndex = this.pendingBills.indexOf(selectedBill);
+
+      // Display the items of the selected bill
+      this.showPendingBillItems(selectedBill);
+    } else {
+      console.error('Selected bill not found in pending bills.');
+    }
+  }
+  updateBill() {
+    this.posConfiService.getBillById(this.selectedBillId).subscribe(
+      (response: any) => {
+
+      }
+    )
+  }
+
 }

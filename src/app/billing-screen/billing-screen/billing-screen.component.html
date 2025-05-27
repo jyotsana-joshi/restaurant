@@ -20,7 +20,12 @@
             <a class="nav-link" [class.active]="selectedSection === 'kot'" (click)="selectedSection = 'kot'">Billing & KOT</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#"> Final Report</a>
+           <a class="nav-link" (click)="openReportModal('Final Report', 'final-report')">Final Report</a>
+           
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" (click)="openReportModal('Sales Report','mode-wise-report')">Sales Report</a></li>
+
         </ul>
       </div>
     </div>
@@ -321,13 +326,13 @@
           </div>
           <div class="form-label">Payment To :</div>
           <div class="form-input w-100">
-            <input class="w-100" type="text" formControlName="vendorName">
+            <input class="w-100" type="text" formControlName="paymentTo">
           </div>
         </div>
         <div class="form-row">
           <div class="form-label">Payment Mode :</div>
           <div class="form-input w-100">
-            <input class="w-100" type="text" value="Cash" formControlName="paymentMode">
+            <input class="w-100" type="text" value="Cash" disabled>
           </div>
           <div class="form-label">Payment Amt :</div>
           <div class="form-input w-100">
@@ -342,68 +347,89 @@
         </div>
       </div>
       
-      <table class="order-table w-100">
-        <thead >
-          <tr>
-            <th>#</th>
-            <th>Payment ID</th>
-            <th>Payment To</th>
-            <th>Mode</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Render payment rows -->
-          <tr
-          *ngFor="let payment of payments; let i = index"
-          [ngClass]="{
-            'selected-row': i === selectedPaymentRowIndex,
-            'new-row': i === newlyAddedPaymentRowIndex
-          }"
-          (click)="onPaymentRowSelect(i)"
-        >
-            <td>{{ i + 1 }}</td>
-            <td>{{ payment.paymentId || '' }}</td>
-            <td>{{ payment.vendorName || '' }}</td>
-            <td>{{ payment.paymentMode || '' }}</td>
-            <td>{{ payment.amount || '' }}</td>
-          </tr>
-      
-          <!-- Render blank rows -->
-          <ng-container *ngIf="payments.length < blankRowsPayment">
-            <tr *ngFor="let blankRow of [].constructor(blankRowsPayment - payments.length); let i = index">
-            <td>{{ payments.length + i + 1 }}</td>
-              <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-        </ng-container>
+      <div class="payment-div ">
+        <table class="order-table w-100">
+          <thead >
+            <tr>
+              <th>#</th>
+              <th>Payment ID</th>
+              <th>Payment To</th>
+              <th>Mode</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="isLoadingPayments">
+              <td colspan="5" class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </td>
+            </tr>
+            <ng-container *ngIf="!isLoadingPayments">
 
-        </tbody>
-      </table>
+            <!-- Render payment rows -->
+            <tr
+            *ngFor="let payment of payments; let i = index"
+            [ngClass]="{
+              'selected-row': i === selectedPaymentRowIndex,
+              'new-row': i === newlyAddedPaymentRowIndex
+            }"
+            (click)="onPaymentRowSelect(i)"
+          >
+              <td>{{ i + 1 }}</td>
+              <td>{{ payment.id || '' }}</td>
+              <td>{{ payment.paymentTo || '' }}</td>
+              <td>{{ payment.paymentMode || '' }}</td>
+              <td>{{ payment.amount || '' }}</td>
+            </tr>
+        
+            <!-- Render blank rows -->
+            <ng-container *ngIf="payments.length < blankRowsPayment">
+              <tr *ngFor="let blankRow of [].constructor(blankRowsPayment - payments.length); let i = index">
+              <td>{{ payments.length + i + 1 }}</td>
+                <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            </ng-container>
+          </ng-container>
+
+          </tbody>
+        </table>
+      </div>
       
       <div class="button-bar">
         <div class="action-button" (click)="savePayment()">
-          <div class="button-icon">💾</div>
-          <div class="button-text" >Save</div>
+          <div *ngIf="!isSavingPayment" class="button-icon">💾</div>
+          <div *ngIf="!isSavingPayment" class="button-text">Save</div>
+          <div *ngIf="isSavingPayment" class="button-icon">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+          </div>
         </div>
-        <div class="action-button">
-          <div class="button-icon">🔄</div>
-          <div class="button-text">Update</div>
+        <div class="action-button" (click)="savePayment()">
+          <div *ngIf="!isUpdatingPayment" class="button-icon">🔄</div>
+          <div *ngIf="!isUpdatingPayment" class="button-text">Update</div>
+          <div *ngIf="isUpdatingPayment" class="button-icon">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+          </div>
         </div>
-        <div class="action-button">
-          <div class="button-icon">❌</div>
-          <div class="button-text">Delete</div>
+        <div class="action-button" (click)="deletePayment()">
+          <div *ngIf="!isDeletingPayment" class="button-icon">❌</div>
+            <div *ngIf="!isDeletingPayment" class="button-text">Delete</div>
+            <div *ngIf="isDeletingPayment" class="button-icon">
+              <div  class="spinner-border spinner-border-sm text-primary" role="status"></div>
+            </div>
         </div>
-        <div class="action-button">
+        <div class="action-button" (click)="resetPaymentForm()">
           <div class="button-icon">↩️</div>
           <div class="button-text">Reset</div>
         </div>
-        <div class="action-button">
+        <!-- <div class="action-button">
           <div class="button-icon exit-icon">🚪</div>
           <div class="button-text">Exit</div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -685,6 +711,41 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reportModalLabel">{{ selectedReport }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="reportForm">
+          <div class="mb-3 d-flex">
+            <label for="from" class="form-label">Start Date</label>
+            <input type="date" id="from" class="form-control" formControlName="from">
+          </div>
+          <div class="mb-3 d-flex">
+            <label for="to" class="form-label">End Date</label>
+            <input type="date" id="to" class="form-control" formControlName="to">
+          </div>
+          <div class="mb-3 d-flex">
+            <input type="checkbox" id="isHalfDay"  formControlName="isHalfDay">
+            <label for="isHalfDay" class="form-check-label">Half Day</label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" (click)="generateReport()">
+          <span *ngIf="!isGeneratingReport">Generate Report</span>
+          <span *ngIf="isGeneratingReport" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span *ngIf="isGeneratingReport"> Generating...</span>
+        </button>
       </div>
     </div>
   </div>

@@ -1,3 +1,7 @@
+* {
+  pointer-events: all !important;
+}
+
 body {
   font-size: 14px;
 }
@@ -733,4 +737,25 @@ display: grid;
   flex-direction: column;
   gap: 10px;
   margin-top: 5px;
+}
+
+.modal-title {
+  font-weight: bold;
+}
+
+.form-check-label {
+  margin-left: 5px;
+}
+
+// .dropdown-menu {
+//   z-index: 9999 ;
+//   display: block ;
+// }
+
+.payment-div {
+  overflow-y: auto;
+  overflow-x: auto;
+  max-height: 200px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
 }

@@ -49,7 +49,7 @@ export class BillingScreenComponent {
   missingDetailsMessage: string = '';
   branchId: any
   userDetails: any;
-  selectedSection: string = 'kot';
+  selectedSection: string = 'payments';
   payments: any[] = []; // Array to store payment records
   blankRowsPayment: number = 5;
   addCashPaymentForm: any
@@ -64,8 +64,21 @@ export class BillingScreenComponent {
   selectedPendingBill: any = null; // Store the selected pending bill
   selectedPendingBillItems: any[] = []; // Store items of the selected pending bill
   selectedPendingBillIndex: number | null = null; // To track the selected row
+  reportForm: FormGroup;
+  selectedReport: string = '';
+  apiName: string = '';
+  isGeneratingReport: boolean = false;
+  isLoadingPayments: boolean = false;
+  selectedPayment: any = null; // To store the selected payment for editing
+  isSavingPayment: boolean = false; // For the "Save" button
+  isUpdatingPayment: boolean = false; // For the "Update" button
+  isDeletingPayment: boolean = false; 
   constructor(private posConfiService: POSConfigurationService, private fb: FormBuilder) {
     const value = localStorage.getItem('userDetails');
+    const now = new Date();
+    const formattedDate = this.formatDate(now); // DD/MM/YYYY
+    this.todayDate.setValue(formattedDate);
+    this.billDateToday.setValue(formattedDate);
     this.posConfiService.getUser(value).subscribe(
       (response: any) => {
         console.log(response, "responsee");
@@ -78,13 +91,14 @@ export class BillingScreenComponent {
     this.otherChargesForm = this.fb.group({
       amount: [0] // Default value for other charges
     });
+    this.reportForm = this.fb.group({
+      from: [formattedDate],
+      to: [formattedDate],
+      isHalfDay: [false]
+    });
   }
   ngOnInit() {
-    const now = new Date();
-    const formattedDate = this.formatDate(now); // DD/MM/YYYY
-    console.log('formattedDate: ', formattedDate);
-    this.todayDate.setValue(formattedDate);
-    this.billDateToday.setValue(formattedDate);
+
     this.getAllPendingBills();
     this.customerForm = this.fb.group({
       customerId: [],
@@ -115,7 +129,6 @@ export class BillingScreenComponent {
       customerName: [''],
       discount: [0]
     })
-
     this.paymentForm.get('paid')?.valueChanges.subscribe(() => {
       this.updateBalance();
     });
@@ -164,12 +177,14 @@ export class BillingScreenComponent {
       });
     this.addCashPaymentForm = this.fb.group({
       paymentDate: [this.todayDate.value, Validators.required],
-      vendorName: ['', Validators.required],
-      paymentMode: [{ value: 'Cash', disabled: true }],
-      amount: ['', [Validators.required, Validators.min(0.01)]],
+      paymentTo: ['', Validators.required],
+      amount: [0, [Validators.required, Validators.min(0.01)]],
       remarks: ['']
     });
-
+    this.getAllPayments();
+    this.addCashPaymentForm.get('payamentDate')?.valueChanges.subscribe((date: Date) => {
+      this.getAllPayments();
+    })
     this.discountPercent.valueChanges.pipe(debounceTime(300)).subscribe((value: number) => {
       console.log('Discount value changed:', value);
       if (value < 0 || value > 100) {
@@ -515,7 +530,7 @@ export class BillingScreenComponent {
     );
   }
 
-  printBill(bill:any){
+  printBill(bill: any) {
     const id = bill.id || bill; // Ensure id is defined
     this.posConfiService.getBillByIdPdf(id).subscribe(
       (pdfResponse: Blob) => {
@@ -540,36 +555,101 @@ export class BillingScreenComponent {
   savePayment() {
     if (this.addCashPaymentForm.valid) {
       const paymentData = this.addCashPaymentForm.getRawValue();
-      paymentData.paymentDate = new Date(paymentData.paymentDate).toISOString();
-      console.log('paymentData: ', paymentData);
-
+      paymentData.branchId = this.branchId; // Add branch ID to the payment data
+      paymentData.amount = parseFloat(paymentData.amount);
+      console.log('paymentData: ', paymentData,this.selectedPayment);
+      const paymentId = this.selectedPayment ? this.selectedPayment.id : null;
       // Comment out the API call
-      // this.http.post('/api/payments', paymentData).subscribe(
-      //   (response: any) => {
-      //     console.log('Payment saved successfully:', response);
-      //   },
-      //   (error: any) => {
-      //     console.error('Error saving payment:', error);
-      //     alert('Failed to save payment. Please try again.');
-      //   }
-      // );
-
-      // Add the payment to the table directly
-      this.payments.push(paymentData);
-      this.newlyAddedPaymentRowIndex = this.payments.length - 1;
+      if(paymentId) {
+        this.isUpdatingPayment = true;
+        this.posConfiService.updatePayments(paymentId,paymentData).subscribe(
+          (response: any) => {
+            this.isUpdatingPayment = false;
+            console.log('Payment saved successfully:', response);
+          },
+          (error: any) => {
+            this.isUpdatingPayment = false;
+            console.error('Error saving payment:', error);
+            alert('Failed to save payment. Please try again.');
+          }
+        );
+      }else{
+        this.isSavingPayment = true;
+        this.posConfiService.createPayments(paymentData).subscribe(
+          (response: any) => {
+          this.isSavingPayment = false;
+            console.log('Payment saved successfully:', response);
+          },
+          (error: any) => {
+            this.isSavingPayment = false;
+            console.error('Error saving payment:', error);
+            alert('Failed to save payment. Please try again.');
+          }
+        );
+      }
+      
       setTimeout(() => (this.newlyAddedPaymentRowIndex = null), 1000);
-
+      setTimeout(() => {
+      this.getAllPayments();
+      }, 1000);
       // Reset the form
-      this.addCashPaymentForm.get('amount')?.setValue('');
-      this.addCashPaymentForm.get('vendorName')?.setValue('');
+      this.addCashPaymentForm.get('amount')?.setValue(0);
+      this.addCashPaymentForm.get('paymentTo')?.setValue('');
       this.addCashPaymentForm.get('remarks')?.setValue('');
     } else {
       alert('Please fill in all required fields.');
     }
   }
 
+  deletePayment() {
+    this.isDeletingPayment = true;
+    this.posConfiService.deletePayments(this.selectedPayment.id).subscribe(
+      (response: any) => {
+        this.isDeletingPayment = false;
+        console.log('Payment deleted successfully:', response);
+        const index = this.payments.findIndex(payment => payment.id === this.selectedPayment.id);
+        this.payments.splice(index, 1); // Remove the payment from the array
+        this.resetPaymentForm(); // Reset the form after deletion
+      },
+      (error: any) => {
+        this.isDeletingPayment = false;
+        console.error('Error deleting payment:', error);
+        alert('Failed to delete payment. Please try again.');
+      }
+    );
+  }
+    
+  getAllPayments(){
+    this.payments = [];
+    this.isLoadingPayments = true;
+    this.posConfiService.getAllPayments().subscribe(
+      (response: any) => {
+      this.isLoadingPayments = false;
+        if (response.data.length > 0) {
+          this.payments = response.data
+        } 
+      },
+      (error: any) => {
+        this.isLoadingPayments = false;
+      });
+  }
+
   onPaymentRowSelect(index: number) {
     this.selectedPaymentRowIndex = index; // Highlight the selected row
+    this.selectedPayment = this.payments[index]; // Get the selected payment
+    // Populate the paymentForm with the selected payment's details
+    this.addCashPaymentForm.patchValue({
+      paymentDate: this.selectedPayment.paymentDate || this.todayDate.value, // Use the current date if paymentDate is not available
+      paymentTo: this.selectedPayment.paymentTo || '',
+      amount: this.selectedPayment.amount || 0,
+      remarks: this.selectedPayment.remarks || ''
+    });
+  }
+
+  resetPaymentForm() {
+    this.addCashPaymentForm.reset();
+    this.addCashPaymentForm.get('paymentDate')?.setValue(this.todayDate.value); // Reset to today's date
+    this.selectedPaymentRowIndex = null; // Clear the selected row index
   }
 
   newBill() {
@@ -694,17 +774,20 @@ export class BillingScreenComponent {
     const paymentMode = this.allTransactionTypes.find(
       (type: any) => type.name === paymentModeName
     );
-    console.log('paymentMode: ', paymentMode);
     if (!this.selectedPendingBill) {
       alert('Please select a pending bill first.');
       return;
     }
-
+    const paid = this.kotPaymentForm.get('paid')?.value
+    if(paid <= 0){
+      alert('Please enter a valid paid amount.');
+      return;
+    }
     // Prepare the updated bill payload
     const updatedBill = {
       id: this.selectedPendingBill.id, // Use the ID of the selected pending bill 
-      isPendingPayment: false, // Mark payment as completed
-      paid: this.kotPaymentForm.get('paid')?.value || 0, // Get the paid amount
+      isPendingPayment: this.kotPaymentForm.get('bal')?.value == 0 ? false : true, // Mark payment as completed
+      paid: paid || 0, // Get the paid amount
       bal: this.kotPaymentForm.get('bal')?.value || 0, // Get the balance,
       paymentMethodId: paymentMode ? paymentMode.id : null, // Use the ID of the selected payment mode  
     };
@@ -767,7 +850,7 @@ export class BillingScreenComponent {
   }
   showPendingBills(event: any) {
     console.log('event: ', event.target.value);
-   const selectedPendingBillId = event.target.value;
+    const selectedPendingBillId = event.target.value;
 
     // Find the selected bill in the pending bills list
     console.log('this.pendingBills: ', this.pendingBills);
@@ -791,5 +874,30 @@ export class BillingScreenComponent {
       }
     )
   }
+  openReportModal(reportType: string, apiName: string) {
+    this.apiName = '';
+    this.selectedReport = reportType; // Set the selected report type
+    this.apiName = apiName;
+    const reportModal = new bootstrap.Modal(document.getElementById('reportModal')!);
+    reportModal.show(); // Show the modal
+  }
 
+  generateReport() {
+    const formData = this.reportForm.value;
+    this.isGeneratingReport = true;
+    this.posConfiService.generateFinalReport(formData, this.apiName).subscribe(
+      (pdfResponse: Blob) => {
+        this.isGeneratingReport = false;
+        const reportModalElement = document.getElementById('reportModal')!;
+        const reportModal = bootstrap.Modal.getInstance(reportModalElement) || new bootstrap.Modal(reportModalElement);
+        reportModal.hide();
+        const pdfUrl = URL.createObjectURL(pdfResponse);
+        window.open(pdfUrl, '_blank');
+      }, (error: any) => {
+        this.isGeneratingReport = false;
+        console.error('Error generating report:', error);
+        alert('Failed to generate report. Please try again.');
+      }
+
+  )}
 }

@@ -149,5 +149,26 @@ export class POSConfigurationService {
   getBillById(billId: any) {
     return this.httpClient.get(`${this.ApiUrl}billing/${billId}`);
   }
+
+  updateBill(billingId: any, payload: any){
+    return this.httpClient.put(`${this.ApiUrl}billing/${billingId}`, payload);
+  }
+
+  generateFinalReport(payload: any, api: any) {
+    return this.httpClient.get(`${this.ApiUrl}billing/${api}?from=${payload.from}&to=${payload.to}&isHalfDay=${payload.isHalfDay}`, { responseType: 'blob' });
+  }
   
+  createPayments(payload: any) {
+    return this.httpClient.post(`${this.ApiUrl}payments`, payload);
+  }
+ 
+  updatePayments(id: any, payload: any) {
+    return this.httpClient.put(`${this.ApiUrl}payments/${id}`, payload);
+  }
+  getAllPayments() {
+    return this.httpClient.get(`${this.ApiUrl}payments`);
+  }
+  deletePayments(paymentIds: any) {
+    return this.httpClient.delete(`${this.ApiUrl}payments/${paymentIds}`);
+  }
 }

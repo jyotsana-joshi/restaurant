@@ -11,13 +11,13 @@
             <a class="nav-link active" aria-current="page" href="#">Master</a>
           </li> -->
           <li class="nav-item">
-            <a class="nav-link" [class.active]="selectedSection === 'billing'" (click)="selectedSection = 'billing'">Billing Screen</a>
+            <a class="nav-link" [class.active]="selectedSection === 'billing'" (click)="changeTab('billing')">Billing Screen</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" [class.active]="selectedSection === 'payments'" (click)="selectedSection = 'payments'">Payments</a>
+            <a class="nav-link" [class.active]="selectedSection === 'payments'" (click)="changeTab('payments')">Payments</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" [class.active]="selectedSection === 'kot'" (click)="selectedSection = 'kot'">Billing & KOT</a>
+            <a class="nav-link" [class.active]="selectedSection === 'kot'" (click)="changeTab('kot')">Billing & KOT</a>
           </li>
           <li class="nav-item">
            <a class="nav-link" (click)="openReportModal('Final Report', 'final-report')">Final Report</a>
@@ -87,7 +87,7 @@
           </div>
         </div>
         <div class="w-100 d-flex my-1 flex-row flex-wrap align-items-stretch justify-content-between">
-          <div #itemScroll class="item-scroll col border">
+          <div #itemScroll class="item-scroll col border no-padding">
             <div class="w-100 beverage-grid d-flex flex-row flex-wrap align-items-start justify-content-start">
               <button class="beverage-item" data-price="45" *ngFor="let item of categoryItems"
                 (click)="onItemSelect(item)">{{item.name}}</button>
@@ -111,9 +111,9 @@
                 <span class="w-100 fw-semibold">Down</span>
               </div>
             </button>
-            <button class="w-100 h-auto mt-auto">
+            <button class="w-100 h-auto mt-auto" [disabled]="!selectedBillId" (click)="updateBill()">
               <div class="d-flex flex-column w-100 text-center">
-                <span class=" w-100">
+                <span class="w-100">
                   <img src="assets/icon/file-update.png">
                 </span>
                 <span class="w-100 fw-semibold">Update</span>
@@ -229,7 +229,7 @@
                       </div>
                     </div>
                   <div class="col-sm-4 gap-1 d-flex align-items-end justify-content-evenly">
-                    <button class="col h-auto" (click)="saveBill()">
+                    <button class="col h-auto" [disabled]="selectedBillId"  (click)="saveBill()">
                       <div class="d-flex flex-column w-100 text-center">
                         <span class=" w-100">
                           <img src="assets/icon/sav_print.png">
@@ -257,12 +257,14 @@
                 readonly>
               </div>
               <div class="col-12 d-flex align-items-stretch justify-content-start padding-0 mg-b">
-                <label for="" class="text-white lh-1 bg-blue text-end w-40">Dis. In%:</label>
+                <label for="" class="text-white lh-1 bg-blue text-end w-40">Dis. In:</label>
+                <select [formControl]="discountFormControl">
+                  <option *ngFor="let dis of disOption" [value]="dis.id">{{dis.value}}</option>
+                </select>
                 <input class="w-60 fw-bold text-end" type="text" [formControl]="discountPercent" placeholder="0.0">
               </div>
-              
               <div class="col-12 mt-1 d-flex align-items-stretch justify-content-start padding-0">
-                <select class="col-12 fs-5 fw-bold" (click)="ontransactionTypeSelect($event)">
+                <select class="col-12 fs-5 fw-bold" (click)="ontransactionTypeSelect($event)" [formControl]="transactionType">
                   <option *ngFor="let tran of allTransactionTypes" [value]="tran.id">{{tran.name}}</option>
                 </select>
               </div>
@@ -272,13 +274,13 @@
                   <div class="col-6 mt-0 d-flex  align-items-stretch justify-content-start padding-0">
                     <label for="" class="text-white lh-1 bg-blue text-end col-5">Cash:</label>
                     <div class="col-7 d-flex padding-0">
-                      <input class="col-12 padding-0" type="text">
+                      <input class="col-12 padding-0" type="text" formControlName="cash">
                     </div>
                   </div>
                   <div class="col-6 d-flex align-items-stretch justify-content-start padding-0">
-                    <label for="" class="text-white lh-1 bg-blue text-end col-5">card:</label>
+                    <label for="" class="text-white lh-1 bg-blue text-end col-5">Card:</label>
                     <div class="col-7 d-flex padding-0">
-                      <input class="col-12 padding-0" type="text">
+                      <input class="col-12 padding-0" type="text" formControlName="card">
                     </div>
                   </div>
                   <!-- <div class="col-6 d-flex align-items-stretch justify-content-start padding-0">
@@ -322,7 +324,7 @@
         <div class="form-row">
           <div class="form-label">Payment Dt. :</div>
           <div class="form-input w-100">
-            <input class="w-100" type="date" formControlName="paymentDate">
+            <input class="w-100" type="date" formControlName="paymentDate" (change)="onDateSelect($event)">
           </div>
           <div class="form-label">Payment To :</div>
           <div class="form-input w-100">
@@ -433,7 +435,7 @@
       </div>
     </div>
   </div>
-  <div *ngIf="selectedSection === 'kot'">
+  <div *ngIf="selectedSection === 'kot' && !loader">
     <div class="bill-container">
       <div class="bill-header">
           <div class="bill-header-item">
@@ -669,6 +671,9 @@
           </table>
       </div>
   </div>
+  </div>
+  <div *ngIf="loader" class="full-screen-loader">
+    <div class="loader"></div>
   </div>
 </div>
 

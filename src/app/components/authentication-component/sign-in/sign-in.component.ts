@@ -28,27 +28,23 @@ export class SignInComponent {
   ngOnInit(): void { }
 
   onSubmit(): void {
-    if (this.loginForm.valid) {
-      this.loading = true;
-      this.authService.login(this.loginForm.value).subscribe(
-        (response: any) => {
-          this.loading = false;
-          console.log(response, "response");
-          if (response.data) {
-            this.userDetails = response;
-            localStorage.setItem(this.TOKEN_KEY, this.userDetails.data.access_token);
-            localStorage.setItem(this.USER_KEY, this.userDetails.data.user_id.id)
-            this.toastrService.success("Login successfully", "Login",);
-            this.router.navigate(['/home']);
-          }
-        },
-        (error) => {
-          this.loading = false;
-          this.toastrService.error(error?.error?.message, "Login",);
-        }
-      )
-    } else {
+    if (!this.loginForm.valid) {
       this.loading = false;
+      return
     }
+
+    this.authService.login(this.loginForm.value).subscribe({
+      next: (response) => {
+        this.userDetails = response;
+
+        localStorage.setItem(this.TOKEN_KEY, this.userDetails.data.access_token);
+        localStorage.setItem(this.USER_KEY, this.userDetails.data.user_id.id)
+      
+        this.router.navigate(['/billing-screen']);
+      }, error: (err) => {
+        this.toastrService.error(err.error.message, 'Error');
+        console.log('err', err.error.message)
+      }
+    });
   }
 }

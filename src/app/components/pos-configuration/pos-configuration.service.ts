@@ -114,7 +114,7 @@ export class POSConfigurationService {
   }
 
   addCustomer(payload: any) {
-    return this.httpClient.post(`${this.ApiUrl}customer-management/add`, payload);
+    return this.httpClient.post(`${this.ApiUrl}customer-management`, payload);
   }
 
   editCustomer(payload: any, customerId: any) {
@@ -165,8 +165,8 @@ export class POSConfigurationService {
   updatePayments(id: any, payload: any) {
     return this.httpClient.put(`${this.ApiUrl}payments/${id}`, payload);
   }
-  getAllPayments() {
-    return this.httpClient.get(`${this.ApiUrl}payments`);
+  getAllPayments(date:any) {
+    return this.httpClient.get(`${this.ApiUrl}payments?date=${date}`);
   }
   deletePayments(paymentIds: any) {
     return this.httpClient.delete(`${this.ApiUrl}payments/${paymentIds}`);

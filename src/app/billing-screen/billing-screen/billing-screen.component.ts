@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 // Removed incorrect import as 'bootstrap' module does not export 'bootstrap'
 import { FormBuilder, FormGroup, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import * as bootstrap from 'bootstrap';
+import { ToastrService } from 'ngx-toastr';
 import { debounceTime, distinctUntilChanged, Subscription, switchMap } from 'rxjs';
 import { POSConfigurationService } from 'src/app/components/pos-configuration/pos-configuration.service';
 
@@ -49,7 +50,7 @@ export class BillingScreenComponent {
   missingDetailsMessage: string = '';
   branchId: any
   userDetails: any;
-  selectedSection: string = 'payments';
+  selectedSection: string = 'billing';
   payments: any[] = []; // Array to store payment records
   blankRowsPayment: number = 5;
   addCashPaymentForm: any
@@ -72,8 +73,14 @@ export class BillingScreenComponent {
   selectedPayment: any = null; // To store the selected payment for editing
   isSavingPayment: boolean = false; // For the "Save" button
   isUpdatingPayment: boolean = false; // For the "Update" button
-  isDeletingPayment: boolean = false; 
-  constructor(private posConfiService: POSConfigurationService, private fb: FormBuilder) {
+  isDeletingPayment: boolean = false;
+  disOption: any = [
+    { value: '%', id: '%' },
+    { value: 'AED', id: 'AED' }]
+  discountFormControl: UntypedFormControl = new UntypedFormControl('%');
+  loader = false;
+  transactionType: UntypedFormControl = new UntypedFormControl('1')
+  constructor(private posConfiService: POSConfigurationService, private fb: FormBuilder, private toastr: ToastrService) {
     const value = localStorage.getItem('userDetails');
     const now = new Date();
     const formattedDate = this.formatDate(now); // DD/MM/YYYY
@@ -98,8 +105,6 @@ export class BillingScreenComponent {
     });
   }
   ngOnInit() {
-
-    this.getAllPendingBills();
     this.customerForm = this.fb.group({
       customerId: [],
       mobile: [],
@@ -112,9 +117,11 @@ export class BillingScreenComponent {
     this.getAllBills()
 
     this.paymentForm = this.fb.group({
-      bill: null,
-      paid: null,
-      balance: null,
+      bill: [null],
+      paid: [null],
+      balance: [null],
+      card: [null],
+      cash: [null]
     });
 
     this.kotPaymentForm = this.fb.group({
@@ -143,11 +150,53 @@ export class BillingScreenComponent {
       this.allBillsIds = [];
       this.getAllBills();
     });
+
     this.billDateToday.valueChanges.subscribe((date: Date) => {
       this.pendingBills = [];
       this.getAllPendingBills();
     });
 
+    this.paymentForm.get('cash')?.valueChanges.subscribe((cashValue: number) => {
+      if (cashValue) {
+        const subtotal = this.paymentForm.get('bill')?.value || 0;
+        const remaining = subtotal - cashValue;
+        this.paymentForm.patchValue({ card: remaining >= 0 ? remaining : 0 }, { emitEvent: false });
+      } else {
+        this.paymentForm.patchValue({ card: null }, { emitEvent: false });
+      }
+    });
+
+    this.paymentForm.get('card')?.valueChanges.subscribe((cardValue: number) => {
+      if (cardValue) {
+        const subtotal = this.paymentForm.get('bill')?.value || 0;
+        const remaining = subtotal - cardValue;
+        this.paymentForm.patchValue({ cash: remaining >= 0 ? remaining : 0 }, { emitEvent: false });
+      } else {
+        this.paymentForm.patchValue({ cash: null }, { emitEvent: false });
+
+      }
+    });
+
+    // this.kotPaymentForm.get('cash')?.valueChanges.subscribe((cashValue: number) => {
+    //   if(cashValue){
+    //     const subtotal = this.kotPaymentForm.get('bill')?.value || 0;
+    //     const remaining = subtotal - cashValue;
+    //     this.kotPaymentForm.patchValue({ card: remaining >= 0 ? remaining : 0 }, { emitEvent: false });
+    //   }else{
+    //     this.kotPaymentForm.patchValue({ card: null }, { emitEvent: false });
+    //   }
+    // });
+
+    // this.kotPaymentForm.get('card')?.valueChanges.subscribe((cardValue: number) => {
+    //  if(cardValue){
+    //    const subtotal = this.kotPaymentForm.get('bill')?.value || 0;
+    //    const remaining = subtotal - cardValue;
+    //    this.kotPaymentForm.patchValue({ cash: remaining >= 0 ? remaining : 0 }, { emitEvent: false });
+    //   }else{
+    //    this.kotPaymentForm.patchValue({ cash: null }, { emitEvent: false });
+
+    //   }
+    // });
     this.searchSub = this.customerForm.get('mobile')?.valueChanges
       .pipe(
         debounceTime(300), // wait 300ms after typing stops
@@ -160,7 +209,6 @@ export class BillingScreenComponent {
           return this.posConfiService.getCustomers({ offset: 0, limit: 10 }, value);
         })
       ).subscribe((data: any) => {
-        console.log('data: ', data);
         if (data.data.customers.length > 0) {
           const customer = data.data.customers[0];
           this.customerForm.patchValue({
@@ -181,21 +229,41 @@ export class BillingScreenComponent {
       amount: [0, [Validators.required, Validators.min(0.01)]],
       remarks: ['']
     });
-    this.getAllPayments();
-    this.addCashPaymentForm.get('payamentDate')?.valueChanges.subscribe((date: Date) => {
-      this.getAllPayments();
+    // this.addCashPaymentForm.get('paymentDate')?.valueChanges.subscribe((date: Date) => {
+    //   // this.getAllPayments(date);
+    // })
+    this.discountFormControl.valueChanges.pipe(debounceTime(300)).subscribe((value: any) => {
+      let amount
+      const disValue = parseFloat(this.discountPercent?.value || 0)
+      if (value === '%') {
+        if (disValue < 0 || disValue > 100) {
+          console.error('Invalid discount value. It should be between 0 and 100.');
+          return;
+        }
+        amount = (this.subtotalAmount * disValue) / 100
+      } else {
+        amount = disValue
+      }
+      this.paymentForm.get('bill')?.setValue(this.subtotalAmount - amount);
+      this.paymentForm.get('balance')?.setValue(this.subtotalAmount - amount);
+      this.paymentForm.get('card')?.setValue(null, { emitEvent: false });
+      this.paymentForm.get('cash')?.setValue(null, { emitEvent: false });
     })
     this.discountPercent.valueChanges.pipe(debounceTime(300)).subscribe((value: number) => {
-      console.log('Discount value changed:', value);
       if (value < 0 || value > 100) {
         console.error('Invalid discount value. It should be between 0 and 100.');
         return;
       }
-      // Calculate the discount amount and update the subtotal
-      const discountAmount = (this.subtotalAmount * value) / 100;
+      let discountAmount = 0
+      if (this.discountFormControl.value === 'AED') {
+        discountAmount = value;
+      } else {
+        discountAmount = (this.subtotalAmount * value) / 100;
+      }
       this.paymentForm.get('bill')?.setValue(this.subtotalAmount - discountAmount);
       this.paymentForm.get('balance')?.setValue(this.subtotalAmount - discountAmount);
-      this.updateBalance();
+      this.paymentForm.get('card')?.setValue((null), { emitEvent: false });
+      this.paymentForm.get('cash')?.setValue((null), { emitEvent: false });
     })
   }
 
@@ -278,17 +346,14 @@ export class BillingScreenComponent {
       })
   }
   getItemByCategoryId(category: any) {
-    console.log('category: ', category);
     this.selectedCategory = category.name;
     this.posConfiService.getItemByCategoryId(category.id).subscribe(
       (response: any) => {
-        console.log('response: ', response);
         if (response.data.length > 0) {
           this.categoryItems = response.data
         } else {
           this.categoryItems = [];
         }
-        console.log('this.categoryItems: ', this.categoryItems);
       },
       (error) => {
         console.error('Error fetching items:', error);
@@ -373,15 +438,27 @@ export class BillingScreenComponent {
     this.subtotalAmount = this.displayedOrders
       .filter(order => order && order.total != null)
       .reduce((sum, order) => sum + order.total, 0);
-    this.paymentForm.get('bill')?.setValue(this.subtotalAmount);
+    const disValue = parseFloat(this.discountPercent?.value || 0)
+    const value = this.discountFormControl.value;
+    let amount = 0
+    if (value === '%') {
+      if (disValue < 0 || disValue > 100) {
+        console.error('Invalid discount value. It should be between 0 and 100.');
+        return;
+      }
+      amount = (this.subtotalAmount * disValue) / 100
+    } else {
+      amount = disValue
+    }
+    this.paymentForm.get('bill')?.setValue((this.subtotalAmount - amount).toFixed(2));
+    this.paymentForm.get('balance')?.setValue((this.subtotalAmount - amount).toFixed(2));
 
     // Update balance also
-    this.updateBalance();
+    // this.updateBalance();
   }
 
 
   onNumpadClick(key: string) {
-    console.log('key: ', key, this.inputQty);
     if (this.selectedRowIndex === null) return;
 
     // Append the key to input string
@@ -394,6 +471,8 @@ export class BillingScreenComponent {
       order.qty = parsedQty;
       order.total = order.qty * order.rate;
     }
+    // Update the subtotal
+    this.calculateTotalAmount();
   }
   onRowSelect(index: number) {
     this.selectedRowIndex = index;
@@ -404,13 +483,14 @@ export class BillingScreenComponent {
   }
 
   ontransactionTypeSelect(event: any) {
-    console.log('Selected transaction type:', event.target.value);
     this.selectedPlatform = event.target.value;
     this.orders.forEach(order => {
-      const platformPriceObj = order.price.find((p: any) => p.platFormId == this.selectedPlatform);
-      const price = platformPriceObj ? platformPriceObj.price : 0;
-      order.rate = price;
-      this.updateOrderTotal(order);
+      const platformPriceObj = order?.price?.find((p: any) => p?.platFormId == this.selectedPlatform);
+      if (platformPriceObj) {
+        const price = platformPriceObj ? platformPriceObj.price : 0;
+        order.rate = price;
+        this.updateOrderTotal(order);
+      }
     });
   }
 
@@ -464,70 +544,73 @@ export class BillingScreenComponent {
       }
     }
 
-    console.log('customerName: ', customerName, customerId);
-    // if((customerName || customerMobile) && !customerId){
-    //   const customerPayload = {
-    //     name: customerName,
-    //     mobile: customerMobile,
-    //     address: this.customerForm.get('address')?.value,
-    //     remark: this.customerForm.get('remark')?.value,
-    //   };
-    //   this.posConfiService.addCustomer(customerPayload).subscribe(
-    //     (response:any) => {
-    //       console.log('Customer added successfully:', response);
-    //       this.customerForm.patchValue({
-    //         customerId: response.data.id
-    //       });
-    //     },
-    //     (error:any) => {
-    //       console.error('Error adding customer:', error);
-    //       alert('Failed to add customer. Please try again.');
-    //     }
-    //   );
-    // }
-    const payload = {
-      billingCalc: {
-        items: this.orders.map(order => ({
-          id: order.id,
-          name: order.name,
-          price: order.rate,
-          quantity: order.qty
-        })),
-        vat: this.subtotalAmount * 0.05, // Calculate 5% VAT
-        amountWithOutVat: this.subtotalAmount - (this.subtotalAmount * 0.05),
-      },
-      isTakeAway: this.selectedOrderType.value === 'Take Away',
-      isHomeDelivery: this.selectedOrderType.value === 'Home Delivery',
-      subTotal: this.subtotalAmount,
+    const saveBillPayload = () => {
+      console.log('this.selectedPlatform: ', this.selectedPlatform);
+      const payload = {
+        billingCalc: {
+          items: this.orders.map(order => ({
+            id: order.id,
+            name: order.name,
+            price: order.rate,
+            quantity: order.qty
+          })),
+          vat: this.subtotalAmount * 0.05, // Calculate 5% VAT
+          amountWithOutVat: this.subtotalAmount - (this.subtotalAmount * 0.05),
+          card: this.selectedPlatform == 3 ? this.paymentForm.get('card')?.value : 0,
+          cash: this.selectedPlatform == 3 ? this.paymentForm.get('cash')?.value : 0
+        },
+        isTakeAway: this.selectedOrderType.value === 'Take Away',
+        isHomeDelivery: this.selectedOrderType.value === 'Home Delivery',
+        subTotal: this.subtotalAmount,
+        discount: this.discountPercent?.value || 0,
+        deliveryBoyId: this.customerForm.get('deliveryBoy')?.value || null,
+        branchId: this.branchId, // Replace with actual branch ID if dynamic
+        paymentMethodId: this.selectedPlatform, // Assuming selectedPlatform holds the payment method ID
+        table: this.selectedOrderType.value === 'Table',
+        customerId: customerId ?? null,
+        paid: this.paymentForm.get('paid')?.value ?? 0,
+        bill: this.paymentForm.get('bill')?.value ?? null,
+        isPendingPayment: this.subtotalAmount === this.paymentForm.get('paid')?.value ? false : true,
+        remarks: this.customerForm.get('remark')?.value || '',
 
-      discount: this.paymentForm.get('discount')?.value || 0,
-      deliveryBoyId: this.customerForm.get('deliveryBoy')?.value || null,
-      branchId: this.branchId, // Replace with actual branch ID if dynamic
-      paymentMethodId: this.selectedPlatform, // Assuming selectedPlatform holds the payment method ID
-      table: this.selectedOrderType.value === 'Table',
-      customerId: customerId ?? null,
-      paid: this.paymentForm.get('paid')?.value ?? 0,
-      bal: this.paymentForm.get('bill')?.value ?? null,
-      isPendingPayment: this.subtotalAmount === this.paymentForm.get('paid')?.value ? false : true,
-      remarks: this.customerForm.get('remark')?.value || '',
+      };
+
+      // Call the saveBill API
+      this.posConfiService.saveBill(payload).subscribe(
+        (response: any) => {
+          this.printBill(response?.data?.id);
+          this.getAllBills();
+          this.toastr.success('Bill saved successfully')
+          this.newBill(); // Reset the form for a new bill
+        },
+        (error: any) => {
+          this.toastr.error(error.error.message, 'Error')
+        }
+      );
     };
 
-    console.log('Saving bill with payload:', payload);
-
-    // Call the service to save the bill
-    this.posConfiService.saveBill(payload).subscribe(
-      (response: any) => {
-        this.printBill(response?.data?.id);
-        console.log('Bill saved successfully:', response);
-        this.getAllBills();
-        alert('Bill saved successfully!');
-        this.newBill(); // Reset the form for a new bill
-      },
-      (error: any) => {
-        console.error('Error saving bill:', error);
-        alert('Failed to save the bill. Please try again.');
-      }
-    );
+    const customerPayload = {
+      name: customerName,
+      phone: customerMobile,
+      address: this.customerForm.get('address')?.value,
+      isActive: true
+    };
+    // If customerId is not found, create the customer first
+    if (!customerId && (customerName || customerMobile)) {
+      this.posConfiService.addCustomer(customerPayload).subscribe(
+        (response: any) => {
+          this.customerForm.patchValue({
+            customerId: response.data.id
+          });
+          saveBillPayload(); // Call saveBill after customer creation
+        },
+        (error: any) => {
+          this.toastr.error(error.error.message, 'Error')
+        }
+      );
+    } else {
+      saveBillPayload(); // Directly call saveBill if customerId exists
+    }
   }
 
   printBill(bill: any) {
@@ -548,7 +631,7 @@ export class BillingScreenComponent {
       },
       (error: any) => {
         console.error('Error fetching PDF:', error);
-        alert('Failed to fetch the bill PDF. Please try again.');
+        this.toastr.error(error.error.message, 'Error')
       }
     );
   }
@@ -556,48 +639,43 @@ export class BillingScreenComponent {
     if (this.addCashPaymentForm.valid) {
       const paymentData = this.addCashPaymentForm.getRawValue();
       paymentData.branchId = this.branchId; // Add branch ID to the payment data
-      paymentData.amount = parseFloat(paymentData.amount);
-      console.log('paymentData: ', paymentData,this.selectedPayment);
+      paymentData.amount = parseFloat(paymentData?.amount);
       const paymentId = this.selectedPayment ? this.selectedPayment.id : null;
       // Comment out the API call
-      if(paymentId) {
+      if (paymentId) {
         this.isUpdatingPayment = true;
-        this.posConfiService.updatePayments(paymentId,paymentData).subscribe(
+        this.posConfiService.updatePayments(paymentId, paymentData).subscribe(
           (response: any) => {
             this.isUpdatingPayment = false;
-            console.log('Payment saved successfully:', response);
           },
           (error: any) => {
             this.isUpdatingPayment = false;
-            console.error('Error saving payment:', error);
-            alert('Failed to save payment. Please try again.');
+            this.toastr.error(error.error.message, 'Error')
           }
         );
-      }else{
+      } else {
         this.isSavingPayment = true;
         this.posConfiService.createPayments(paymentData).subscribe(
           (response: any) => {
-          this.isSavingPayment = false;
-            console.log('Payment saved successfully:', response);
+            this.isSavingPayment = false;
           },
           (error: any) => {
             this.isSavingPayment = false;
-            console.error('Error saving payment:', error);
-            alert('Failed to save payment. Please try again.');
+            this.toastr.error(error.error.message, 'Error')
           }
         );
       }
-      
+
       setTimeout(() => (this.newlyAddedPaymentRowIndex = null), 1000);
       setTimeout(() => {
-      this.getAllPayments();
+        this.getAllPayments();
       }, 1000);
       // Reset the form
       this.addCashPaymentForm.get('amount')?.setValue(0);
       this.addCashPaymentForm.get('paymentTo')?.setValue('');
       this.addCashPaymentForm.get('remarks')?.setValue('');
     } else {
-      alert('Please fill in all required fields.');
+      this.toastr.warning('Please fill the required details')
     }
   }
 
@@ -606,28 +684,27 @@ export class BillingScreenComponent {
     this.posConfiService.deletePayments(this.selectedPayment.id).subscribe(
       (response: any) => {
         this.isDeletingPayment = false;
-        console.log('Payment deleted successfully:', response);
         const index = this.payments.findIndex(payment => payment.id === this.selectedPayment.id);
         this.payments.splice(index, 1); // Remove the payment from the array
         this.resetPaymentForm(); // Reset the form after deletion
       },
       (error: any) => {
         this.isDeletingPayment = false;
-        console.error('Error deleting payment:', error);
-        alert('Failed to delete payment. Please try again.');
+        this.toastr.error(error.error.message, 'Error')
       }
     );
   }
-    
-  getAllPayments(){
+
+  getAllPayments() {
+    const paymentDate = this.addCashPaymentForm.get('paymentDate').getRawValue();
     this.payments = [];
     this.isLoadingPayments = true;
-    this.posConfiService.getAllPayments().subscribe(
+    this.posConfiService.getAllPayments(paymentDate).subscribe(
       (response: any) => {
-      this.isLoadingPayments = false;
+        this.isLoadingPayments = false;
         if (response.data.length > 0) {
           this.payments = response.data
-        } 
+        }
       },
       (error: any) => {
         this.isLoadingPayments = false;
@@ -660,18 +737,19 @@ export class BillingScreenComponent {
     this.paymentForm.reset();
     this.todayDate.setValue(this.formatDate(new Date()));
     this.subtotalAmount = 0;
-    this.selectedPlatform = 1;
-
+    this.discountPercent.setValue(0);
+    this.discountFormControl.setValue('%');
+    this.selectedOrderType.setValue('Table');
+    this.transactionType.setValue('1');
+    this.selectedBillId = ''
   }
   onItemSelect(item: any) {
-    console.log('Selected item:', item);
     this.addItemToOrder(item);
   }
 
   getDeliveryBoys() {
     this.posConfiService.getDeliveryBoys().subscribe(
       (response: any) => {
-        console.log('response: ', response);
         if (response.data.length > 0) {
           this.allDeliveryBoys = response.data;
         }
@@ -704,7 +782,6 @@ export class BillingScreenComponent {
     console.log(this.formatDate(new Date()), "this.formatDate(new Date())")
     this.posConfiService.getAllBills(this.todayDate.value).subscribe(
       (response: any) => {
-        console.log('response: ', response);
         if (response.data.length > 0) {
           this.allBillsIds = response.data
           this.allBillsIds = response.data
@@ -712,7 +789,6 @@ export class BillingScreenComponent {
             .sort((a: any, b: any) => a.billingId - b.billingId); // Sort by billingId
 
         }
-        console.log(this.allBillsIds, this.allBillsIds)
       },
       (error: any) => {
         console.error('Error fetching delivery', error);
@@ -720,18 +796,22 @@ export class BillingScreenComponent {
   }
 
   getAllPendingBills() {
+    this.loader = true;
+    this.pendingBills = [];
     this.posConfiService.getAllBills(this.billDateToday.value, true).subscribe(
       (response: any) => {
-        console.log('response: ', response);
         if (response.data.length > 0) {
+          this.loader = false;
           this.pendingBills = response.data;
           this.pendingBillsIds = response.data
             .map((bill: any) => ({ id: bill.id, billingId: bill.billingId }));
         } else {
+          this.loader = false;
           this.pendingBills = [];
         }
       },
       (error: any) => {
+        this.loader = false;
         console.error('Error fetching delivery', error);
       })
   }
@@ -747,17 +827,17 @@ export class BillingScreenComponent {
       total: item.price * item.quantity
     }));
 
-    const balance = -parseFloat(bill.subTotal);
 
+    const discountMin = parseFloat(bill.subTotal) - parseFloat(bill.discount)
     this.kotPaymentForm.patchValue({
       isTakeAway: bill.isTakeAway, // Add the missing control with a default value
       isHomeDelivery: bill.isHomeDelivery, // Add other controls as needed
       paymentMode: bill.paymentMethod.name, // Example control for payment mode
-      subTotal: parseFloat(bill.subTotal),
-      cash: [],
-      card: [],
+      subTotal: discountMin,
+      cash: bill?.billingCalc?.cash,
+      card: bill?.billingCalc?.card,
       paid: 0,
-      bal: balance,
+      bal: -discountMin,
       customerName: [''],
       discount: bill.discount || 0
     })
@@ -765,22 +845,20 @@ export class BillingScreenComponent {
   onPendingBillSelect(index: number, bill: any) {
     this.selectedPendingBillIndex = index; // Highlight the selected row
     this.showPendingBillItems(bill) // Set the selected bill
-    console.log('Selected Pending Bill:', bill);
   }
   receivePayment() {
-    console.log('this.selectedPendingBill: ', this.selectedPendingBill);
     const paymentModeName = this.kotPaymentForm.get('paymentMode')?.value;
     // Find the corresponding payment mode ID from allTransactionTypes
     const paymentMode = this.allTransactionTypes.find(
       (type: any) => type.name === paymentModeName
     );
     if (!this.selectedPendingBill) {
-      alert('Please select a pending bill first.');
+      this.toastr.error('Please select the pending bill')
       return;
     }
     const paid = this.kotPaymentForm.get('paid')?.value
-    if(paid <= 0){
-      alert('Please enter a valid paid amount.');
+    if (paid <= 0) {
+      this.toastr.error('Please enter valid paid amount')
       return;
     }
     // Prepare the updated bill payload
@@ -795,15 +873,13 @@ export class BillingScreenComponent {
     // Call the update API
     this.posConfiService.updateBill(updatedBill.id, updatedBill).subscribe(
       (response: any) => {
-        alert('Payment received successfully!');
         this.getAllPendingBills(); // Refresh the pending bills list
         this.selectedPendingBill = null; // Clear the selected bill
         this.selectedPendingBillItems = []; // Clear the items
         this.kotPaymentForm.reset(); // Reset the form
-
       },
       (error: any) => {
-        alert('Failed to update payment status. Please try again.');
+        this.toastr.error(error.error.message, 'Error')
       }
     );
   }
@@ -822,10 +898,13 @@ export class BillingScreenComponent {
 
         // Update other fields on the billing screen
         this.subtotalAmount = parseFloat(response.subTotal);
+        const discountMin = this.subtotalAmount - parseFloat(response?.discount)
         this.paymentForm.patchValue({
-          bill: this.subtotalAmount,
-          paid: response?.isPendingPayment ? 0 : this.subtotalAmount, // Assuming full payment for now
-          balance: response?.isPendingPayment ? this.subtotalAmount : 0 // Assuming no balance for now
+          bill: discountMin,
+          paid: response?.isPendingPayment ? 0 : discountMin, // Assuming full payment for now
+          balance: response?.isPendingPayment ? discountMin : 0, // Assuming no balance for now
+          card: response?.billingCalc?.card,
+          cash: response?.billingCalc?.cash
         });
         const customerDetails = response.customer
         this.customerForm.patchValue({
@@ -868,9 +947,20 @@ export class BillingScreenComponent {
     }
   }
   updateBill() {
-    this.posConfiService.getBillById(this.selectedBillId).subscribe(
+    let payload = {
+      isTakeAway: this.selectedOrderType.value === 'Take Away',
+      isHomeDelivery: this.selectedOrderType.value === 'Home Delivery',
+      deliveryBoyId: this.customerForm.get('deliveryBoy')?.value[0] || null,
+      paymentMethodId: this.selectedPlatform, // Assuming selectedPlatform holds the payment method ID
+      table: this.selectedOrderType.value === 'Table',
+    }
+    this.posConfiService.updateBill(this.selectedBillId, payload).subscribe(
       (response: any) => {
-
+        this.toastr.success('Bill updated successfuly', 'Success');
+        this.newBill();
+      },
+      (error) => {
+        this.toastr.success(error.error.message, 'Error')
       }
     )
   }
@@ -895,9 +985,28 @@ export class BillingScreenComponent {
         window.open(pdfUrl, '_blank');
       }, (error: any) => {
         this.isGeneratingReport = false;
-        console.error('Error generating report:', error);
-        alert('Failed to generate report. Please try again.');
+        this.toastr.success(error.error.message, 'Error')
       }
+    )
+  }
 
-  )}
+  onDateSelect(event: any) {
+    console.log('event: ', event);
+    this.getAllPayments()
+  }
+
+  changeTab(tab: any) {
+    this.selectedSection = tab;
+    this.selectedPendingBillIndex = null,
+      this.selectedPendingBill = [];
+    this.selectedPendingBillItems = [];
+    this.billDateToday.setValue(this.formatDate(new Date()))
+    this.newBill();
+    if (this.selectedSection === 'kot') {
+      this.getAllPendingBills();
+    }
+    if (this.selectedSection === 'payments') {
+      this.getAllPayments();
+    }
+  }
 }

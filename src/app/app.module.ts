@@ -36,11 +36,10 @@ import { BsDatepickerConfig, BsDatepickerModule } from 'ngx-bootstrap/datepicker
     HttpClientModule,
     ToastrModule.forRoot({
       closeButton: true,
-      timeOut: 5000,  // Toast disappears after 5 seconds
+      timeOut: 3000,  // Toast disappears after 5 seconds
       positionClass: 'toast-top-right',
       preventDuplicates: true,
       progressBar: true,  // Show progress bar
-      tapToDismiss: false,
     }),
     BsDatepickerModule.forRoot(),
     POSConfigurationModule,

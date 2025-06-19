@@ -433,74 +433,76 @@
               </select>
           </div>
       </div>
-      <table class="bill-table">
-          <thead>
-              <tr>
-                <th style="width: 30px;">#</th>
-                <th>Item Name</th>
-                <th style="width: 80px;">Rate</th>
-                <th style="width: 80px;">Quantity</th>
-                <th style="width: 80px;">Total</th>
-                  <!-- <th style="width: 30px;">C</th>
-                  <th>Name</th>
-                  <th style="width: 80px;">Rate (PO)</th>
+      <div class="table-wrap">
+        <table class="bill-table">
+            <thead>
+                <tr>
+                  <th style="width: 30px;">#</th>
+                  <th>Item Name</th>
+                  <th style="width: 80px;">Rate</th>
                   <th style="width: 80px;">Quantity</th>
-                  <th style="width: 50px;">V/I</th>
-                  <th style="width: 80px;">Total (PO)</th> -->
-              </tr>
-          </thead>
-          <tbody>
-              <!-- <tr>
-                  <td style="text-align: center;"><input type="checkbox" checked></td>
-                  <td>Ice Cola in Bowl</td>
-                  <td style="text-align: right;">8.000</td>
-                  <td style="text-align: right;">3.000</td>
-                  <td>Unit</td>
-                  <td style="text-align: right;">24.000</td>
-              </tr>
-              <tr>
-                  <td style="text-align: center;"><input type="checkbox" checked></td>
-                  <td>Ice Cola in Bowl</td>
-                  <td style="text-align: right;">8.000</td>
-                  <td style="text-align: right;">3.000</td>
-                  <td>Unit</td>
-                  <td style="text-align: right;">24.000</td>
-              </tr>
-              <tr>
-                  <td style="text-align: center;"><input type="checkbox" checked></td>
-                  <td>Ice Cola in Bowl</td>
-                  <td style="text-align: right;">8.000</td>
-                  <td style="text-align: right;">3.000</td>
-                  <td>Unit</td>
-                  <td style="text-align: right;">24.000</td>
-              </tr>
-              <tr>
-                  <td style="text-align: center;"><input type="checkbox" checked></td>
-                  <td>Ice Cola in Bowl</td>
-                  <td style="text-align: right;">8.000</td>
-                  <td style="text-align: right;">3.000</td>
-                  <td>Unit</td>
-                  <td style="text-align: right;">24.000</td>
-              </tr> -->
-              <tr *ngFor="let item of selectedPendingBillItems; let i = index">
-                <td>{{ i + 1 }}</td>
-                <td>{{ item.name }}</td>
-                <td>{{ item.rate | number: '1.2-2' }}</td>
-                <td>{{ item.qty }}</td>
-                <td>{{ item.total | number: '1.2-2' }}</td>
-              </tr>
-              <ng-container *ngIf="selectedPendingBillItems.length < 5">
-              <tr *ngFor="let blankRow of [].constructor(5 - selectedPendingBillItems.length); let i = index" >
-                <td>{{ selectedPendingBillItems.length + i + 1 }}</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            </ng-container>
+                  <th style="width: 80px;">Total</th>
+                    <!-- <th style="width: 30px;">C</th>
+                    <th>Name</th>
+                    <th style="width: 80px;">Rate (PO)</th>
+                    <th style="width: 80px;">Quantity</th>
+                    <th style="width: 50px;">V/I</th>
+                    <th style="width: 80px;">Total (PO)</th> -->
+                </tr>
+            </thead>
+            <tbody>
+                <!-- <tr>
+                    <td style="text-align: center;"><input type="checkbox" checked></td>
+                    <td>Ice Cola in Bowl</td>
+                    <td style="text-align: right;">8.000</td>
+                    <td style="text-align: right;">3.000</td>
+                    <td>Unit</td>
+                    <td style="text-align: right;">24.000</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;"><input type="checkbox" checked></td>
+                    <td>Ice Cola in Bowl</td>
+                    <td style="text-align: right;">8.000</td>
+                    <td style="text-align: right;">3.000</td>
+                    <td>Unit</td>
+                    <td style="text-align: right;">24.000</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;"><input type="checkbox" checked></td>
+                    <td>Ice Cola in Bowl</td>
+                    <td style="text-align: right;">8.000</td>
+                    <td style="text-align: right;">3.000</td>
+                    <td>Unit</td>
+                    <td style="text-align: right;">24.000</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;"><input type="checkbox" checked></td>
+                    <td>Ice Cola in Bowl</td>
+                    <td style="text-align: right;">8.000</td>
+                    <td style="text-align: right;">3.000</td>
+                    <td>Unit</td>
+                    <td style="text-align: right;">24.000</td>
+                </tr> -->
+                <tr *ngFor="let item of selectedPendingBillItems; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.name }}</td>
+                  <td>{{ item.rate | number: '1.2-2' }}</td>
+                  <td>{{ item.qty }}</td>
+                  <td>{{ item.total | number: '1.2-2' }}</td>
+                </tr>
+                <ng-container *ngIf="selectedPendingBillItems.length < 5">
+                <tr *ngFor="let blankRow of [].constructor(5 - selectedPendingBillItems.length); let i = index" >
+                  <td>{{ selectedPendingBillItems.length + i + 1 }}</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </ng-container>
 
-          </tbody>
-      </table>
+            </tbody>
+        </table>
+      </div>
 
       <div class="payment-section" [formGroup]="kotPaymentForm">
           <div class="left-controls">
@@ -620,7 +622,7 @@
           </div>
       </div>
 
-      <div class="pending-bills">
+      <div class="pending-bills table-wrap">
           <table class="pending-table">
               <thead>
                   <tr>

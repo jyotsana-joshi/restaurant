@@ -1,4 +1,5 @@
-<div class="container-fluid" *ngIf="!isLoading">
+
+<div class="container-fluid" *ngIf="!isLoading && isBranchSelected">
   <nav class="w-100 navbar p-0 navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -31,7 +32,7 @@
     </div>
   </nav>
   <div *ngIf="selectedSection === 'billing'" class="row bg-wrapper align-items-stretch  justify-content-start g-1">
-    <div class="col-sm-2 bg-blue m-0">
+    <div class="col-sm-3 bg-blue m-0">
       <div class="w-100 d-flex flex-column align-items-start justify-content-between p-1">
         <div class="w-100 d-flex align-items-start justify-content-between">
           <button class="w-33" (click)="scrollUp()">
@@ -61,7 +62,7 @@
         </div>
       </div>
     </div>
-    <div class="col-sm-10">
+    <div class="col-sm-9">
       <div class="w-100 d-flex flex-column align-items-start justify-content-between p-1">
         <div class="w-100 d-flex flex-row flex-wrap align-items-stretch justify-content-between">
           <span class="bg-blue p-1 text-white">
@@ -69,10 +70,11 @@
             {{selectedCategory}}
           </span>
           <div class="d-flex flex-row gap-1 flex-wrap align-items-center justify-content-start">
-            <!-- <div class="d-inline-flex header-input col-xs-12 bg-white px-1 align-items-center justify-content-start">
-              <input type="checkbox" name="" id="">
-              <span class="ms-1">Take Away</span>
-            </div> -->
+            <div class="d-inline-flex header-input col-xs-12 align-items-stretch justify-content-start ">
+              <label for="" class="text-white bg-blue text-end">Last Bill NO:</label>
+              <input  class="input" type="text" [value]="lastBillGenerated?.billingId" disabled>
+
+            </div>
             <div class="d-inline-flex header-input col-xs-12 align-items-stretch justify-content-start ">
               <label for="" class="text-white bg-blue text-end">Bill NO:</label>
               <select class="w-100-p " (change)="showBill($event)">
@@ -111,7 +113,7 @@
                 <span class="w-100 fw-semibold">Down</span>
               </div>
             </button>
-            <button class="w-100 h-auto mt-auto" [disabled]="!selectedBillId" (click)="updateBill()">
+            <button class="w-100 h-auto mt-auto"  [disabled]="!selectedBillId" (click)="updateBill()">
               <div class="d-flex flex-column w-100 text-center">
                 <span class="w-100">
                   <img src="assets/icon/file-update.png">
@@ -165,7 +167,7 @@
                 </div>
                 <div class="w-10 d-flex align-items-end flex-column text-center ps-1 position-relative">
                   <button class="w-100 h-auto" data-bs-toggle="modal" data-bs-target="#otherChargesModal">
-                    <span class="fs-6 fw-semibold w-100 text-center"> Other Charges </span>
+                    <span class="fw-semibold w-100 text-center"> Other Charges </span>
                   </button>
                   <button class="w-100 h-auto" (click)="deleteItem()">
                     <div class="d-flex flex-column w-100 text-center">
@@ -271,29 +273,6 @@
 
               <div class="w-100 mt-auto">
                 <div class="row row w-100 m-0 g-1" [formGroup]="paymentForm">
-                  <div class="col-6 mt-0 d-flex  align-items-stretch justify-content-start padding-0">
-                    <label for="" class="text-white lh-1 bg-blue text-end col-5">Cash:</label>
-                    <div class="col-7 d-flex padding-0">
-                      <input class="col-12 padding-0" type="text" formControlName="cash">
-                    </div>
-                  </div>
-                  <div class="col-6 d-flex align-items-stretch justify-content-start padding-0">
-                    <label for="" class="text-white lh-1 bg-blue text-end col-5">Card:</label>
-                    <div class="col-7 d-flex padding-0">
-                      <input class="col-12 padding-0" type="text" formControlName="card">
-                    </div>
-                  </div>
-                  <!-- <div class="col-6 d-flex align-items-stretch justify-content-start padding-0">
-                    <label for="" class="text-white bg-blue text-end col-5">No:</label>
-                    <select class="col-7">
-                      <option>1</option>
-                      <option>2</option>
-                      <option>3</option>
-                    </select>
-                  </div>
-                  <div class="col-6 d-flex align-items-stretch justify-content-start">
-                    <input class="col-12" type="text">
-                  </div> -->
                   <div class="col-6 d-flex align-items-stretch justify-content-start">
                     <!-- <label for="" class="text-white lh-1 bg-blue text-end w-60-p">Cash:</label>
                         <input class="col" type="text"> -->
@@ -541,9 +520,9 @@
                           <img src="assets/icon/sav_print.png" alt="Save & Print">
                           Save & Print
                       </button>
-                      <button class="btn">
-                          <img src="assets/icon/save-only.png" alt="Save Only">
-                          Save Only
+                      <button class="btn" (click)="receivePayment(true)">
+                          <img src="assets/icon/save-only.png" alt="Receive All">
+                          Receive All
                       </button>
                   </div>
                   <div class="btn-group">
@@ -656,7 +635,7 @@
                   <td>{{ i + 1 }}</td>
                   <td>{{ bill.billingId }}</td>
                   <td>{{ bill.subTotal | number: '1.2-2' }}</td>
-                  <td>N/A</td>
+                  <td>{{bill.orderType}}</td>
                 </tr>
                 <!-- Render blank rows if fewer than 5 pending bills -->
                 <ng-container *ngIf="pendingBills.length < 5">
@@ -699,6 +678,28 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" (click)="saveOtherCharges()" data-bs-dismiss="modal">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="missingBranch" tabindex="-1" aria-labelledby="missingBranchLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+    
+      <div class="modal-header">
+        <h5 class="modal-title" id="missingBranchLabel">Select Branch</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          <div class="mb-3 d-flex">
+            <select class="col" (change)="selectBranch($event)">
+              <option *ngFor="let branch of allBranches" [value]="branch.id">{{ branch.name }}</option>
+            </select>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="branchSelected()">OK</button>
       </div>
     </div>
   </div>

@@ -31,7 +31,18 @@ button img {
   width: 88px;
   line-height: normal;
 }
-
+/* If screen width is less than or equal to 1024px */
+@media screen and (max-width: 1024px) {
+  .beverage-item {
+    width: 92px;
+  }
+}
+/* If screen width is less than or equal to 1024px */
+@media screen and (max-width: 1004px) {
+  .beverage-item {
+    width: 105px;
+  }
+}
 .food-btn button {
   width: 100%;
   font-weight: 600;
@@ -72,6 +83,10 @@ select {
   height: 30px;
 }
 
+.input{
+  width: 50px;
+}
+
 label{
   // border: inset 1px #584e4e4f;
   padding: 1px;
@@ -98,7 +113,7 @@ label.bg-blue {
 }
 
 .w-10 {
-  width: 14%;
+  width: 12%;
 }
 
 .w-60-p {

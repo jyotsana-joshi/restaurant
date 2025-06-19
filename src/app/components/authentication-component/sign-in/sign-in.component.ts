@@ -34,12 +34,24 @@ export class SignInComponent {
     }
 
     this.authService.login(this.loginForm.value).subscribe({
-      next: (response) => {
-        this.userDetails = response;
+      next: (response: any) => {
+        this.userDetails = response.data;
+        localStorage.setItem(this.TOKEN_KEY, this.userDetails.access_token);
+        localStorage.setItem(this.USER_KEY, this.userDetails.user_id.id)
+        let userRole = '';
 
-        localStorage.setItem(this.TOKEN_KEY, this.userDetails.data.access_token);
-        localStorage.setItem(this.USER_KEY, this.userDetails.data.user_id.id)
-      
+        if (this.userDetails?.user_id?.branch) {
+          userRole = 'cashier';
+        } else if (this.userDetails?.user_id?.designation?.name?.toLowerCase() === 'owner') {
+          userRole = 'admin';
+        } else if (this.userDetails?.user_id?.designation?.name?.toLowerCase() === 'manager') {
+          userRole = 'manager';
+        }
+        if (userRole) {
+          localStorage.setItem('userRole', userRole);
+        } else {
+          console.log('User role could not be determined.');
+        }
         this.router.navigate(['/billing-screen']);
       }, error: (err) => {
         this.toastrService.error(err.error.message, 'Error');

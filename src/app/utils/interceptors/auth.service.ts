@@ -53,5 +53,7 @@ export class AuthInterceptor implements HttpInterceptor {
   logout() {
      localStorage.removeItem(this.TOKEN_KEY) 
       localStorage.removeItem(this.USER_KEY);
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('branchId');
   }
 }

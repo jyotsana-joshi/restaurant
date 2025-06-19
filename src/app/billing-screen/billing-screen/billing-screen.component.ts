@@ -3,7 +3,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import * as bootstrap from 'bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { debounceTime, distinctUntilChanged, Subscription, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, forkJoin, Subscription, switchMap } from 'rxjs';
 import { POSConfigurationService } from 'src/app/components/pos-configuration/pos-configuration.service';
 
 @Component({
@@ -12,10 +12,6 @@ import { POSConfigurationService } from 'src/app/components/pos-configuration/po
   styleUrls: ['./billing-screen.component.scss']
 })
 export class BillingScreenComponent {
-  sidebarMenu: string[] = ['Beverage', 'Chat Corner', 'Chinese Cuisine', 'Chinese Soup', 'Dal', 'Desert', 'Extra', 'Farsan List', 'Farsan PKT'];
-  categoryTabs: string[] = ['Beverage', 'Chat Corner', 'Chinese Soup', 'Desert'];
-  items: string[] = ['Avocado Juice', 'Butter Milk', 'Carrot Juice', 'Cold Coffee', 'Dip Tea', 'Fresh Lime Soda', 'Ice Gola', 'Pineapple Juice'];
-  paymentOptions: string[] = ['Cash', 'Credit Card', 'Cash & Card', 'Advance', 'Uber Eats', 'Talabat', 'Zomato'];
   currentDate: string = new Date().toLocaleDateString();
   selectedCategory: string | null = null;
   selectedTab: string = ''
@@ -48,7 +44,7 @@ export class BillingScreenComponent {
   selectedOrderType: UntypedFormControl = new UntypedFormControl('Table');
   otherChargesForm: any
   missingDetailsMessage: string = '';
-  branchId: any
+  branchId: any = null
   userDetails: any;
   selectedSection: string = 'billing';
   payments: any[] = []; // Array to store payment records
@@ -65,7 +61,7 @@ export class BillingScreenComponent {
   selectedPendingBill: any = null; // Store the selected pending bill
   selectedPendingBillItems: any[] = []; // Store items of the selected pending bill
   selectedPendingBillIndex: number | null = null; // To track the selected row
-  reportForm: FormGroup;
+  reportForm!: FormGroup;
   selectedReport: string = '';
   apiName: string = '';
   isGeneratingReport: boolean = false;
@@ -79,9 +75,28 @@ export class BillingScreenComponent {
     { value: 'AED', id: 'AED' }]
   discountFormControl: UntypedFormControl = new UntypedFormControl('%');
   loader = false;
-  transactionType: UntypedFormControl = new UntypedFormControl('1')
+  transactionType: UntypedFormControl = new UntypedFormControl('1');
+  userRole: any = '';
+  lastBillGenerated: any = null; // To store the last bill generated
+  allBranches: any[] = [];
+  isBranchSelected: boolean = false;
   constructor(private posConfiService: POSConfigurationService, private fb: FormBuilder, private toastr: ToastrService) {
     const value = localStorage.getItem('userDetails');
+    this.userRole = this.posConfiService.getUserRole();
+    if (this.userRole === 'cashier') {
+      this.todayDate.disable(); // 🔒 disables the control
+      this.isBranchSelected = true;
+      
+    }else{
+      this.posConfiService.getBranches().subscribe(
+        (response: any) => {
+          this.allBranches = response.data.branches;
+        },
+        (error: any) => {
+          console.error('Error fetching branches:', error);
+        }
+      );
+    }
     const now = new Date();
     const formattedDate = this.formatDate(now); // DD/MM/YYYY
     this.todayDate.setValue(formattedDate);
@@ -90,7 +105,18 @@ export class BillingScreenComponent {
       (response: any) => {
         console.log(response, "responsee");
         this.userDetails = response.data.user;
-        this.branchId = this.userDetails.branch.id;
+        const localBranch = localStorage.getItem('branchId');
+        this.branchId = this.userDetails?.branch?.id || localBranch || null;
+        if(this.branchId) {
+          this.isBranchSelected = true;
+          this.getDeliveryBoys();
+          this.getAllBills();
+        }
+        if((this.userRole === 'admin' || this.userRole === 'manager') && !this.branchId) {
+           const modal = new bootstrap.Modal(document.getElementById('missingBranch')!);
+          modal.show();
+        return;
+        }
       }
     )
     this.getCategories();
@@ -104,6 +130,19 @@ export class BillingScreenComponent {
       isHalfDay: [false]
     });
   }
+
+  selectBranch(event:any){
+    console.log(event.target.value, "event.target.value")
+    const selectedBranchId = event.target.value;
+    this.branchId = selectedBranchId;
+  }
+
+  branchSelected() {
+    localStorage.setItem('branchId', this.branchId);
+    this.isBranchSelected = true;
+    this.getDeliveryBoys();
+    this.getAllBills();
+  }
   ngOnInit() {
     this.customerForm = this.fb.group({
       customerId: [],
@@ -113,9 +152,7 @@ export class BillingScreenComponent {
       remark: [],
       deliveryBoy: []
     });
-    this.getDeliveryBoys();
-    this.getAllBills()
-
+    
     this.paymentForm = this.fb.group({
       bill: [null],
       paid: [null],
@@ -125,7 +162,7 @@ export class BillingScreenComponent {
     });
 
     this.kotPaymentForm = this.fb.group({
-      isTakeAway: [false], // Add the missing control with a default value
+      isTakeAway: [false], // Add the missing control with af default value
       isHomeDelivery: [false], // Add other controls as needed
       paymentMode: ['Cash'], // Example control for payment mode
       subTotal: [0],
@@ -224,7 +261,7 @@ export class BillingScreenComponent {
         }
       });
     this.addCashPaymentForm = this.fb.group({
-      paymentDate: [this.todayDate.value, Validators.required],
+      paymentDate: [this.todayDate.getRawValue(), Validators.required],
       paymentTo: ['', Validators.required],
       amount: [0, [Validators.required, Validators.min(0.01)]],
       remarks: ['']
@@ -716,7 +753,7 @@ export class BillingScreenComponent {
     this.selectedPayment = this.payments[index]; // Get the selected payment
     // Populate the paymentForm with the selected payment's details
     this.addCashPaymentForm.patchValue({
-      paymentDate: this.selectedPayment.paymentDate || this.todayDate.value, // Use the current date if paymentDate is not available
+      paymentDate: this.selectedPayment.paymentDate || this.todayDate.getRawValue(), // Use the current date if paymentDate is not available
       paymentTo: this.selectedPayment.paymentTo || '',
       amount: this.selectedPayment.amount || 0,
       remarks: this.selectedPayment.remarks || ''
@@ -725,7 +762,7 @@ export class BillingScreenComponent {
 
   resetPaymentForm() {
     this.addCashPaymentForm.reset();
-    this.addCashPaymentForm.get('paymentDate')?.setValue(this.todayDate.value); // Reset to today's date
+    this.addCashPaymentForm.get('paymentDate')?.setValue(this.todayDate.getRawValue()); // Reset to today's date
     this.selectedPaymentRowIndex = null; // Clear the selected row index
   }
 
@@ -780,14 +817,15 @@ export class BillingScreenComponent {
 
   getAllBills() {
     console.log(this.formatDate(new Date()), "this.formatDate(new Date())")
-    this.posConfiService.getAllBills(this.todayDate.value).subscribe(
+    this.posConfiService.getAllBills(this.todayDate.getRawValue(), this.branchId).subscribe(
       (response: any) => {
         if (response.data.length > 0) {
           this.allBillsIds = response.data
           this.allBillsIds = response.data
             .map((bill: any) => ({ id: bill.id, billingId: bill.billingId }))
             .sort((a: any, b: any) => a.billingId - b.billingId); // Sort by billingId
-
+          this.lastBillGenerated = this.allBillsIds[this.allBillsIds.length - 1]; // Store the last bill generated
+          console.log(this.lastBillGenerated, "lastBillGenerated")
         }
       },
       (error: any) => {
@@ -798,11 +836,14 @@ export class BillingScreenComponent {
   getAllPendingBills() {
     this.loader = true;
     this.pendingBills = [];
-    this.posConfiService.getAllBills(this.billDateToday.value, true).subscribe(
+    this.posConfiService.getAllBills(this.billDateToday.value, this.branchId, true).subscribe(
       (response: any) => {
         if (response.data.length > 0) {
           this.loader = false;
-          this.pendingBills = response.data;
+          this.pendingBills = response.data.map((item: any) => {
+            item.orderType = item.isTakeAway ? 'TW' : item.isHomeDelivery ? 'HD' : 'Direct Bill';
+            return item;
+          })
           this.pendingBillsIds = response.data
             .map((bill: any) => ({ id: bill.id, billingId: bill.billingId }));
         } else {
@@ -846,7 +887,43 @@ export class BillingScreenComponent {
     this.selectedPendingBillIndex = index; // Highlight the selected row
     this.showPendingBillItems(bill) // Set the selected bill
   }
-  receivePayment() {
+  receivePayment(isReceiveAll: boolean = false) {
+    if (isReceiveAll) {
+      const cashPaymentMode = this.allTransactionTypes.find(
+      (type: any) => type.name.toLowerCase() === 'cash'
+    );
+
+    if (!cashPaymentMode) {
+      this.toastr.error('Cash payment method not found');
+      return;
+    }
+
+    console.log('cashPaymentMode: ', cashPaymentMode, this.pendingBills);
+    const updateRequests = this.pendingBills.map((bill: any) => {
+      console.log(bill, "bill")
+      const updatedBill = {
+        id: bill.id,
+        isPendingPayment: false,
+        paid: bill.subTotal || 0,
+        bal: 0,
+        paymentMethodId: cashPaymentMode.id
+      };
+      return this.posConfiService.updateBill(updatedBill.id, updatedBill);
+    });
+    forkJoin(updateRequests).subscribe(
+      (responses: any[]) => {
+        this.toastr.success('All bills updated successfully');
+        this.getAllPendingBills(); // Refresh the pending bills list
+        this.kotPaymentForm.reset();
+        this.selectedPendingBill = null;
+        this.selectedPendingBillItems = [];
+      },
+      (error: any) => {
+        this.toastr.error(error?.error?.message || 'Error updating all bills');
+      }
+    );
+    return;
+    }       
     const paymentModeName = this.kotPaymentForm.get('paymentMode')?.value;
     // Find the corresponding payment mode ID from allTransactionTypes
     const paymentMode = this.allTransactionTypes.find(
@@ -888,6 +965,7 @@ export class BillingScreenComponent {
     this.selectedBillId = event.target.value;
     this.posConfiService.getBillById(this.selectedBillId).subscribe(
       (response: any) => {
+        
         this.orders = response.billingCalc.items.map((item: any) => ({
           id: item.id,
           name: item.name,
@@ -897,15 +975,22 @@ export class BillingScreenComponent {
         }));
 
         // Update other fields on the billing screen
+        this.transactionType.setValue(response.paymentMethodId);
         this.subtotalAmount = parseFloat(response.subTotal);
         const discountMin = this.subtotalAmount - parseFloat(response?.discount)
         this.paymentForm.patchValue({
           bill: discountMin,
           paid: response?.isPendingPayment ? 0 : discountMin, // Assuming full payment for now
           balance: response?.isPendingPayment ? discountMin : 0, // Assuming no balance for now
-          card: response?.billingCalc?.card,
-          cash: response?.billingCalc?.cash
+          
         });
+        console.log(this.userRole, "this.userRole")
+        if(this.userRole === 'cashier'){
+          this.paymentForm.get('paid').disable();
+          this.paymentForm.get('balance').disable();
+          this.paymentForm.get('bill').disable();
+          this.discountPercent.disable();
+        }
         const customerDetails = response.customer
         this.customerForm.patchValue({
           customerId: [customerDetails?.id],
@@ -956,6 +1041,12 @@ export class BillingScreenComponent {
     }
     this.posConfiService.updateBill(this.selectedBillId, payload).subscribe(
       (response: any) => {
+        if(this.userRole === 'cashier'){
+          this.paymentForm.get('paid').enable();
+          this.paymentForm.get('balance').enable();
+          this.paymentForm.get('bill').enable();
+          this.discountPercent.enable();
+        }
         this.toastr.success('Bill updated successfuly', 'Success');
         this.newBill();
       },

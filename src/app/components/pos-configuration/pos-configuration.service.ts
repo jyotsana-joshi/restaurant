@@ -11,6 +11,9 @@ export class POSConfigurationService {
   userDetails$: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   constructor(private httpClient: HttpClient) { }
 
+  getUserRole(){
+    return localStorage.getItem('userRole');
+  }
   getUser(userId:any) {
     return this.httpClient.get(`${this.ApiUrl}user/${userId}`);
   }
@@ -138,8 +141,8 @@ export class POSConfigurationService {
     return this.httpClient.get(`${this.ApiUrl}billing/${billId}/pdf`, { responseType: 'blob' });
   }
 
-  getAllBills(date: any, isPending?: boolean) {
-    let url = `${this.ApiUrl}billing?date=${date}`;
+  getAllBills(date: any, branchId:any, isPending?: boolean) {
+    let url = `${this.ApiUrl}billing?date=${date}&branchId=${branchId}`;
     if (isPending) {
       url += `&isPendingPayment=${isPending}`;
     }

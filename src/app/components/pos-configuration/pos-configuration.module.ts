@@ -15,6 +15,7 @@ import { ItemsComponent } from './items/items.component';
 import { ItemDialogComponent } from './modals/item-dialog/item-dialog.component';
 import { CustomersComponent } from './customers/customers.component';
 import { CustomerDialogComponent } from './modals/customer-dialog/customer-dialog.component';
+import { BranchMenuComponent } from './branch-menu/branch-menu.component';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 @NgModule({
@@ -28,7 +29,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     ItemsComponent,
     ItemDialogComponent,
     CustomersComponent,
-    CustomerDialogComponent
+    CustomerDialogComponent,
+    BranchMenuComponent
   ],
   imports: [
     CommonModule,
@@ -46,7 +48,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     ItemsComponent,
     ItemDialogComponent,
     CustomersComponent,
-    CustomerDialogComponent
+    CustomerDialogComponent,
+    BranchMenuComponent
   ]
 })
 export class POSConfigurationModule { }

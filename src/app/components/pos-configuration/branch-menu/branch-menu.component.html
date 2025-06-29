@@ -1,0 +1,169 @@
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">Branch Menu Management</h5>
+      <p class="text-muted mb-0">Update item prices for specific branches and payment platforms</p>
+    </div>
+    
+    <div class="card-body">
+      <!-- Branch Selection -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label for="branchSelect" class="form-label">Select Branch</label>
+          <select 
+            id="branchSelect" 
+            class="form-select" 
+            (change)="onBranchSelectChange($event)"
+            [disabled]="loading">
+            <option value="">Choose a branch...</option>
+            <option *ngFor="let branch of branches" [value]="branch.id">
+              {{ branch.name }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="col-md-6 d-flex align-items-end">
+          <div *ngIf="selectedBranch" class="alert alert-info mb-0 w-100">
+            <strong>Selected:</strong> {{ selectedBranch.name }}
+            <span class="badge bg-primary ms-2">{{ getTotalItems() }} items</span>
+            <span *ngIf="getModifiedItems() > 0" class="badge bg-warning ms-2">{{ getModifiedItems() }} modified</span>
+            <span class="badge bg-info ms-2">{{ platforms.length }} platforms</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bulk Actions -->
+      <div *ngIf="selectedBranch && itemsFormArray && itemsFormArray.length > 0" class="row mb-4">
+        <div class="col-12">
+          <div class="card bg-light">
+            <div class="card-body">
+              <h6 class="card-title">Bulk Price Actions</h6>
+              <p class="text-muted small mb-3">These actions will apply to all platforms for all items</p>
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <label class="form-label">Increase by %</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" placeholder="10" min="0" max="100" #increasePercent>
+                    <button class="btn btn-outline-success" type="button" (click)="updateAllPrices(increasePercent.value)">
+                      <i class="bi bi-plus-circle"></i> Increase
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Decrease by %</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" placeholder="10" min="0" max="100" #decreasePercent>
+                    <button class="btn btn-outline-warning" type="button" (click)="updateAllPrices('-' + decreasePercent.value)">
+                      <i class="bi bi-dash-circle"></i> Decrease
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">&nbsp;</label>
+                  <div class="d-grid">
+                    <button class="btn btn-outline-secondary" type="button" (click)="resetPrices()">
+                      <i class="bi bi-arrow-clockwise"></i> Reset All
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">&nbsp;</label>
+                  <div class="d-grid">
+                    <button class="btn btn-primary" type="button" (click)="saveBranchMenu()" [disabled]="loading">
+                      <i class="bi bi-save" *ngIf="!loading"></i>
+                      <div class="spinner-border spinner-border-sm" role="status" *ngIf="loading">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                      Save Menu
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <div *ngIf="selectedBranch && !loading && itemsFormArray && itemsFormArray.length > 0" class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+        <form [formGroup]="menuForm">
+          <table class="table table-bordered table-hover">
+            <thead class="table-dark sticky-top">
+              <tr>
+                <th scope="col" style="width: 50px;">ID</th>
+                <th scope="col" style="width: 200px;">Item Name</th>
+                <th scope="col" style="width: 150px;">Category</th>
+                <th scope="col">Platform Prices</th>
+                <th scope="col" style="width: 100px;">Status</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="items">
+              <tr *ngFor="let itemControl of itemsFormArray.controls; let i = index" [formGroupName]="i" 
+                  [class.table-warning]="isItemModified(itemControl)">
+                <td>{{ itemControl.get('itemId')?.value || '' }}</td>
+                <td>{{ itemControl.get('itemName')?.value || '' }}</td>
+                <td>{{ itemControl.get('category')?.value || '' }}</td>
+                <td>
+                  <div class="row g-2">
+                    <div *ngFor="let platformControl of getPlatformPricesArray(itemControl).controls; let j = index" 
+                         class="col-md-4">
+                      <div class="card border-0 bg-light platform-card">
+                        <div class="card-body p-2">
+                          <small class="text-muted d-block">{{ platformControl.get('platForm')?.value }}</small>
+                          <div class="row g-1">
+                            <div class="col-6">
+                              <small class="text-muted">Current:</small>
+                              <div class="fw-bold">{{ (platformControl.get('currentPrice')?.value || 0) | number:'1.2-2' }} AED</div>
+                            </div>
+                            <div class="col-6">
+                              <small class="text-muted">New:</small>
+                              <input 
+                                type="number" 
+                                class="form-control form-control-sm" 
+                                [formControl]="getNewPriceControl(platformControl)"
+                                min="0" 
+                                step="0.01"
+                                [class.border-warning]="(platformControl.get('currentPrice')?.value || 0) !== (platformControl.get('newPrice')?.value || 0)">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" 
+                        [class]="isItemModified(itemControl) ? 'bg-warning' : 'bg-success'">
+                    {{ isItemModified(itemControl) ? 'Modified' : 'No Change' }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </form>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="d-flex justify-content-center align-items-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <span class="ms-3">Loading...</span>
+      </div>
+
+      <!-- No Items Available -->
+      <div *ngIf="selectedBranch && !loading && (!itemsFormArray || itemsFormArray.length === 0)" class="text-center py-5">
+        <i class="bi bi-box display-1 text-muted"></i>
+        <h4 class="mt-3 text-muted">No Items Available</h4>
+        <p class="text-muted">There are no items configured for this branch.</p>
+      </div>
+
+      <!-- No Branch Selected -->
+      <div *ngIf="!selectedBranch && !loading" class="text-center py-5">
+        <i class="bi bi-building display-1 text-muted"></i>
+        <h4 class="mt-3 text-muted">Select a Branch</h4>
+        <p class="text-muted">Choose a branch from the dropdown above to manage its menu prices.</p>
+      </div>
+    </div>
+  </div>
+</div> 

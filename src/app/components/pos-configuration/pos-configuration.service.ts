@@ -174,4 +174,13 @@ export class POSConfigurationService {
   deletePayments(paymentIds: any) {
     return this.httpClient.delete(`${this.ApiUrl}payments/${paymentIds}`);
   }
+
+  // Branch Menu Management
+  updateBranchMenu(payload: any) {
+    return this.httpClient.post(`${this.ApiUrl}branch-menu/update`, payload);
+  }
+
+  getBranchMenu(branchId: any) {
+    return this.httpClient.get(`${this.ApiUrl}branch-menu/${branchId}`);
+  }
 }

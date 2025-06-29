@@ -786,3 +786,60 @@ display: grid;
   opacity: 0.6; /* Dim the element */
   cursor: not-allowed; /* Show a "not allowed" cursor */
 }
+
+//report
+
+.report-container{
+  border: 2px solid #799add;
+  width: 700px;
+  background-color: #799add;
+  margin: 0 auto;
+  max-width: 100%;
+  font-family: Arial, sans-serif;
+}
+
+.report-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.report-header h1, .report-header h2, .report-header p {
+  margin: 0;
+}
+
+.date-section {
+  text-align: right;
+  margin-bottom: 10px;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.report-table th, .report-table td {
+  border: 1px solid #000;
+  padding: 8px;
+  text-align: left;
+}
+
+.report-table th {
+  background-color: #f2f2f2;
+}
+
+.signature-section {
+  text-align: right;
+  margin-top: 50px;
+}
+
+.editable-input {
+  width: 100%;
+  border: none;
+  background-color: transparent;
+  text-align: right;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  font-family: inherit;
+}

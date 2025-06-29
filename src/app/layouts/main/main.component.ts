@@ -45,6 +45,17 @@ export class MainComponent {
         { menu: 'Customers', icon: 'people', link: '/customers' },
       ],
     },
+    {
+      menu: 'Reports',
+      // icon: 'bar-chart-2',
+      isOpen: false, // Indicates if the submenu is open
+      submenu: [
+        { menu: 'Final Report', icon: 'bar-chart-2', link: '/final-report' },
+        { menu: 'Sales Report', icon: 'bar-chart-2', link: '/mode-wise-report' },
+        { menu: 'Cashier Electronic Report', icon: 'bar-chart-2', link: '/cashier-electronic-report' },
+
+      ],
+    },
     // {
     //   menu: 'Reports',
     //   icon: 'bar-chart-2',

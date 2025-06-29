@@ -63,8 +63,6 @@ export class BillingScreenComponent {
   selectedPendingBillIndex: number | null = null; // To track the selected row
   reportForm!: FormGroup;
   selectedReport: string = '';
-  apiName: string = '';
-  isGeneratingReport: boolean = false;
   isLoadingPayments: boolean = false;
   selectedPayment: any = null; // To store the selected payment for editing
   isSavingPayment: boolean = false; // For the "Save" button
@@ -80,6 +78,36 @@ export class BillingScreenComponent {
   lastBillGenerated: any = null; // To store the last bill generated
   allBranches: any[] = [];
   isBranchSelected: boolean = false;
+  reportData = {
+    cashDetails: [
+      { note: 1000, nos: 1, dhs: 1000, fills: 0 },
+      { note: 500, nos: 2, dhs: 1000, fills: 0 },
+      { note: 200, nos: 10, dhs: 2000, fills: 0 },
+      { note: 100, nos: 5, dhs: 500, fills: 0 },
+      { note: 50, nos: 1, dhs: 50, fills: 0 },
+      { note: 20, nos: 1, dhs: 20, fills: 0 },
+      { note: 10, nos: 1, dhs: 10, fills: 0 },
+      { note: 5, nos: 1, dhs: 5, fills: 0 },
+      { note: 'COINS', nos: 20.5, dhs: 20, fills: 50 }
+    ],
+    totalCash: { dhs: 4605, fills: 50 },
+    dailyCashExpenses: { dhs: 500, fills: 25 },
+    totalDailyCashSales: { dhs: 5105, fills: 50 },
+    foodAggregators: [
+      { name: 'Food aggretator # 1', dhs: 100, fills: 0 },
+      { name: 'Food aggretator # 2', dhs: 200, fills: 0 },
+      { name: 'Food aggretator # 3', dhs: 300, fills: 0 },
+      { name: 'Food aggretator # 4', dhs: 0, fills: 0 },
+      { name: 'Food aggretator # 5', dhs: 0, fills: 0 },
+      { name: 'Food aggretator # 6', dhs: 600, fills: 0 }
+    ],
+    dailyCreditCardSale: { dhs: 695, fills: 0 },
+    totalDailySaleWithVAT: { dhs: 7000, fills: 75 },
+    totalVAT: { dhs: 350, fills: 0 },
+    closingPettyCash: { dhs: 1500 }
+  };
+  @ViewChild('cardBody') cardBody!: ElementRef;
+
   constructor(private posConfiService: POSConfigurationService, private fb: FormBuilder, private toastr: ToastrService) {
     const value = localStorage.getItem('userDetails');
     this.userRole = this.posConfiService.getUserRole();
@@ -129,6 +157,8 @@ export class BillingScreenComponent {
       to: [formattedDate],
       isHalfDay: [false]
     });
+    this.onReportDataChange();
+
   }
 
   selectBranch(event:any){
@@ -778,7 +808,13 @@ export class BillingScreenComponent {
     this.discountFormControl.setValue('%');
     this.selectedOrderType.setValue('Table');
     this.transactionType.setValue('1');
-    this.selectedBillId = ''
+    this.selectedBillId = '';
+    if(this.userRole === 'cashier'){
+      this.paymentForm.get('paid').enable();
+      this.paymentForm.get('balance').enable();
+      this.paymentForm.get('bill').enable();
+      this.discountPercent.enable();
+    }
   }
   onItemSelect(item: any) {
     this.addItemToOrder(item);
@@ -1055,31 +1091,6 @@ export class BillingScreenComponent {
       }
     )
   }
-  openReportModal(reportType: string, apiName: string) {
-    this.apiName = '';
-    this.selectedReport = reportType; // Set the selected report type
-    this.apiName = apiName;
-    const reportModal = new bootstrap.Modal(document.getElementById('reportModal')!);
-    reportModal.show(); // Show the modal
-  }
-
-  generateReport() {
-    const formData = this.reportForm.value;
-    this.isGeneratingReport = true;
-    this.posConfiService.generateFinalReport(formData, this.apiName).subscribe(
-      (pdfResponse: Blob) => {
-        this.isGeneratingReport = false;
-        const reportModalElement = document.getElementById('reportModal')!;
-        const reportModal = bootstrap.Modal.getInstance(reportModalElement) || new bootstrap.Modal(reportModalElement);
-        reportModal.hide();
-        const pdfUrl = URL.createObjectURL(pdfResponse);
-        window.open(pdfUrl, '_blank');
-      }, (error: any) => {
-        this.isGeneratingReport = false;
-        this.toastr.success(error.error.message, 'Error')
-      }
-    )
-  }
 
   onDateSelect(event: any) {
     console.log('event: ', event);
@@ -1099,5 +1110,52 @@ export class BillingScreenComponent {
     if (this.selectedSection === 'payments') {
       this.getAllPayments();
     }
+  }
+  onReportDataChange() {
+    // 1. Update Dhs column based on Nos for cash details
+    this.reportData.cashDetails.forEach(item => {
+      if (typeof item.note === 'number') {
+        item.dhs = item.note * item.nos;
+      } else if (item.note === 'COINS') {
+        // Handle COINS separately if needed, e.g., if nos is the total value
+        item.dhs = Math.floor(item.nos as number);
+        item.fills = Math.round(((item.nos as number) - item.dhs) * 100);
+      }
+    });
+
+    // 2. Recalculate Total Cash
+    const totalCashFills = this.reportData.cashDetails.reduce((sum, item) => sum + item.fills, 0);
+    const totalCashDhsFromDetails = this.reportData.cashDetails.reduce((sum, item) => sum + item.dhs, 0);
+    this.reportData.totalCash.dhs = totalCashDhsFromDetails + Math.floor(totalCashFills / 100);
+    this.reportData.totalCash.fills = totalCashFills % 100;
+
+    // Helper function to convert dhs and fills to a single value
+    const toFills = (dhs: number, fills: number) => (dhs * 100) + fills;
+    const fromFills = (totalFills: number) => ({
+      dhs: Math.floor(totalFills / 100),
+      fills: totalFills % 100
+    });
+
+    // 3. Recalculate Total Daily Cash Sales
+    const totalCashInFills = toFills(this.reportData.totalCash.dhs, this.reportData.totalCash.fills);
+    const expensesInFills = toFills(this.reportData.dailyCashExpenses.dhs, this.reportData.dailyCashExpenses.fills);
+    const totalDailyCashSalesInFills = totalCashInFills - expensesInFills;
+    const totalDailyCashSales = fromFills(totalDailyCashSalesInFills);
+    this.reportData.totalDailyCashSales.dhs = totalDailyCashSales.dhs;
+    this.reportData.totalDailyCashSales.fills = totalDailyCashSales.fills;
+
+    // 4. Recalculate Total Daily Sale with VAT
+    const foodAggregatorsInFills = this.reportData.foodAggregators.reduce((sum, agg) => sum + toFills(agg.dhs, agg.fills), 0);
+    const creditCardInFills = toFills(this.reportData.dailyCreditCardSale.dhs, this.reportData.dailyCreditCardSale.fills);
+    const totalSaleWithVatInFills = totalDailyCashSalesInFills + foodAggregatorsInFills + creditCardInFills;
+    const totalSaleWithVat = fromFills(totalSaleWithVatInFills);
+    this.reportData.totalDailySaleWithVAT.dhs = totalSaleWithVat.dhs;
+    this.reportData.totalDailySaleWithVAT.fills = totalSaleWithVat.fills;
+
+    // 5. Recalculate Total VAT 5%
+    const totalVatInFills = totalSaleWithVatInFills - (totalSaleWithVatInFills / 1.05);
+    const totalVat = fromFills(Math.round(totalVatInFills));
+    this.reportData.totalVAT.dhs = totalVat.dhs;
+    this.reportData.totalVAT.fills = totalVat.fills;
   }
 }

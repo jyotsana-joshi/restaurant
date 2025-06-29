@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BillingScreenComponent } from './billing-screen/billing-screen.component';
+import { ReportsComponent } from './reports/reports.component';
 
 @NgModule({
-  declarations: [BillingScreenComponent
+  declarations: [ReportsComponent
   ],
   imports: [
     CommonModule,
@@ -12,7 +12,7 @@ import { BillingScreenComponent } from './billing-screen/billing-screen.componen
     ReactiveFormsModule
   ],
   exports: [
-    BillingScreenComponent
+    ReportsComponent
   ]
 })
-export class BillingScreenModule { }
+export class ReportsModule { }

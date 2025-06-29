@@ -21,12 +21,8 @@
             <a class="nav-link" [class.active]="selectedSection === 'kot'" (click)="changeTab('kot')">Billing & KOT</a>
           </li>
           <li class="nav-item">
-           <a class="nav-link" (click)="openReportModal('Final Report', 'final-report')">Final Report</a>
-           
+            <a class="nav-link" [class.active]="selectedSection === 'kot'" (click)="changeTab('report')">Report</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" (click)="openReportModal('Sales Report','mode-wise-report')">Sales Report</a></li>
-
         </ul>
       </div>
     </div>
@@ -294,6 +290,97 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="selectedSection === 'report'">
+    <div class="report-container">
+      <!-- <div class="report-header">
+        <h1>BHAVNA RESTAURANT LLC BRANCH</h1>
+        <p>VEGETARIAN (BR2 Khaifa)</p>
+        <p>P.O. BOX : 47156,Al Nasr Tower-3, Hamdan Street, Abu Dhabi</p>
+        <p>Tel No : 02 5553006</p>
+        <h2>HALF DAY / FULL DAY REPORT</h2>
+      </div>
+      <div class="date-section">
+        <span>Date: ......................</span>
+      </div> -->
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Notes</th>
+            <th></th>
+            <th>Nos</th>
+            <th colspan="2">Amount</th>
+          </tr>
+          <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th>Dhs.</th>
+            <th>Fills</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of reportData.cashDetails">
+            <td>{{ item.note }}</td>
+            <td>x</td>
+            <td><input type="number" class="editable-input" [(ngModel)]="item.nos" (input)="onReportDataChange()"></td>
+            <td>{{ item.dhs }}</td>
+            <td>{{ item.fills }}</td>
+          </tr>
+          <tr>
+            <td colspan="2"><strong>Total Cash</strong></td>
+            <td></td>
+            <td><strong>{{ reportData.totalCash.dhs }}</strong></td>
+            <td><strong>{{ reportData.totalCash.fills }}</strong></td>
+          </tr>
+          <tr>
+            <td colspan="2">Daily Cash Expenses</td>
+            <td></td>
+            <td><input type="number" class="editable-input" [(ngModel)]="reportData.dailyCashExpenses.dhs" (input)="onReportDataChange()"></td>
+            <td><input type="number" class="editable-input" [(ngModel)]="reportData.dailyCashExpenses.fills" (input)="onReportDataChange()"></td>
+          </tr>
+          <tr>
+            <td colspan="2"><strong>Total Daily Cash Sales</strong></td>
+            <td></td>
+            <td><strong>{{ reportData.totalDailyCashSales.dhs }}</strong></td>
+            <td><strong>{{ reportData.totalDailyCashSales.fills }}</strong></td>
+          </tr>
+          <tr *ngFor="let item of reportData.foodAggregators">
+            <td colspan="2">{{ item.name }}</td>
+            <td></td>
+            <td><input type="number" class="editable-input" [(ngModel)]="item.dhs" (input)="onReportDataChange()"></td>
+            <td><input type="number" class="editable-input" [(ngModel)]="item.fills" (input)="onReportDataChange()"></td>
+          </tr>
+          <tr>
+            <td colspan="2">Daily Credit Card Sale</td>
+            <td></td>
+            <td><input type="number" class="editable-input" [(ngModel)]="reportData.dailyCreditCardSale.dhs" (input)="onReportDataChange()"></td>
+            <td><input type="number" class="editable-input" [(ngModel)]="reportData.dailyCreditCardSale.fills" (input)="onReportDataChange()"></td>
+          </tr>
+          <tr>
+            <td colspan="2"><strong>Total Daily Sale with VAT</strong></td>
+            <td></td>
+            <td><strong>{{ reportData.totalDailySaleWithVAT.dhs }}</strong></td>
+            <td><strong>{{ reportData.totalDailySaleWithVAT.fills }}</strong></td>
+          </tr>
+          <tr>
+            <td colspan="2">Total VAT 5%</td>
+            <td></td>
+            <td>{{ reportData.totalVAT.dhs }}</td>
+            <td>{{ reportData.totalVAT.fills }}</td>
+          </tr>
+          <tr>
+            <td colspan="2"><strong>Closing Petty cash</strong></td>
+            <td></td>
+            <td><input type="number" class="editable-input" [(ngModel)]="reportData.closingPettyCash.dhs" (input)="onReportDataChange()"></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="signature-section">
+        <span>Signature..................</span>
       </div>
     </div>
   </div>
@@ -719,41 +806,6 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="reportModalLabel">{{ selectedReport }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form [formGroup]="reportForm">
-          <div class="mb-3 d-flex">
-            <label for="from" class="form-label">Start Date</label>
-            <input type="date" id="from" class="form-control" formControlName="from">
-          </div>
-          <div class="mb-3 d-flex">
-            <label for="to" class="form-label">End Date</label>
-            <input type="date" id="to" class="form-control" formControlName="to">
-          </div>
-          <div class="mb-3 d-flex">
-            <input type="checkbox" id="isHalfDay"  formControlName="isHalfDay">
-            <label for="isHalfDay" class="form-check-label">Half Day</label>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" (click)="generateReport()">
-          <span *ngIf="!isGeneratingReport">Generate Report</span>
-          <span *ngIf="isGeneratingReport" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-          <span *ngIf="isGeneratingReport"> Generating...</span>
-        </button>
       </div>
     </div>
   </div>

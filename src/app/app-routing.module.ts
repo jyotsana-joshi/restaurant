@@ -11,6 +11,7 @@ import { NoAuthGuard } from './utils/guard/no-auth.guard';
 import { ItemsComponent } from './components/pos-configuration/items/items.component';
 import { CustomersComponent } from './components/pos-configuration/customers/customers.component';
 import { BillingScreenComponent } from './billing-screen/billing-screen/billing-screen.component';
+import { ReportsComponent } from './components/reports/reports/reports.component';
 
 const routes: Routes = [
   {
@@ -24,6 +25,9 @@ const routes: Routes = [
       {path:"categories", component:CategoriesComponent, canActivate: [AuthGuard]},
       {path:"items", component:ItemsComponent, canActivate: [AuthGuard]},
       {path:"customers", component:CustomersComponent, canActivate: [AuthGuard]},
+      {path:"final-report", component:ReportsComponent, canActivate: [AuthGuard]},
+      {path:"mode-wise-report", component:ReportsComponent, canActivate: [AuthGuard]},
+      {path:"cashier-electronic-report", component:ReportsComponent, canActivate: [AuthGuard]},
     ]
   },
   {

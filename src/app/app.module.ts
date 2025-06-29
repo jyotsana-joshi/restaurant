@@ -18,6 +18,7 @@ import { POSConfigurationModule } from './components/pos-configuration/pos-confi
 import { AuthInterceptor } from './utils/interceptors/auth.service';
 import { BillingScreenModule } from './billing-screen/billing-screen.module';
 import { BsDatepickerConfig, BsDatepickerModule } from 'ngx-bootstrap/datepicker';
+import { ReportsModule } from './components/reports/reports.module';
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { BsDatepickerConfig, BsDatepickerModule } from 'ngx-bootstrap/datepicker
     POSConfigurationModule,
     BillingScreenModule,
     ReactiveFormsModule,
+    ReportsModule
 
   ],
   providers: [AuthGuard,
